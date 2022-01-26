@@ -27,11 +27,11 @@ int main(void){
         log_message("load new chunk");
         sd_header_location = 0;
         if (! is_sd_header(buffer[bit_shift])){
-            int i;
-            for (i=0;i<15;++i){
-                printf("%02x", buffer[0][i]);
-            }
-            printf("\n");
+            //int i;
+            //for (i=0;i<15;++i){
+            //    printf("%02x", buffer[0][i]);
+            //}
+            //printf("\n");
             log_error("bin file doesn't start with sd header");
         }
         while (sd_header_location + SCIENCE_DATA_SIZE + SD_header_SIZE < actual_buffer_size){
