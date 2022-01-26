@@ -39,7 +39,7 @@ int main(void){
             sd_header_location = find_next_sd_header(buffer, sd_header_location);
             if (sd_header_location - old_sd_header_location == SCIENCE_DATA_SIZE + SD_header_SIZE){
                 full++;
-                printf("sd header location = %zu, bit shift = %u\n", sd_header_location, bit_shift);
+                //printf("sd header location = %zu, bit shift = %u\n", sd_header_location, bit_shift);
             }
             else{
                 broken++;

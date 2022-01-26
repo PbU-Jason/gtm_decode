@@ -39,15 +39,13 @@ void destroy_2D_arr(unsigned char** arr, size_t row){
 
 //shift the array n bits left, you should make sure 0<=bits<=7
 void left_shift_mem(unsigned char* target, size_t target_size, unsigned int bits){
-    unsigned char current, next, new;
+    unsigned char current, next;
     size_t i;
 
     for (i=0;i<target_size-1;++i){
         current = target[i];
         next = target[i+1];
-        new = (current << bits) | (next >> (8-bits));
-
-        target[i] = new;
+        target[i] = (current << bits) | (next >> (8-bits));
     }
     //shift the last element
     target[target_size-1] = target[target_size-1] << bits;
