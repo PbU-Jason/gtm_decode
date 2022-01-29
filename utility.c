@@ -1,8 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 #include "utility.h"
+#include "match_pattern.h"
 
+unsigned char* binary_buffer = NULL;
 
 void log_message(char* description){
     printf("Message: ");
@@ -15,6 +18,28 @@ void log_error(char* description){
     printf(description);
     printf("\n");
     exit(1);
+}
+
+void check_endianness(void){
+    unsigned char x[2] = {0x00, 0x01};
+    uint16_t* y;
+    y = (uint16_t*) x;
+    if (*y == 1){
+        log_error("Your computer use big endian format, which is not supported by the program!!");
+    }
+}
+
+void big2little_endian(unsigned char* target, size_t target_size){
+    unsigned char* buffer = NULL;
+    size_t i;
+
+    buffer = (unsigned char*) malloc(target_size);
+    for (i=0;i<target_size;++i){
+        buffer[i] = target[target_size - 1 - i];
+    }
+    
+    memcpy(target, buffer, target_size);
+    free(buffer);
 }
 
 unsigned char** create_2D_arr(size_t row, size_t col){
@@ -38,7 +63,7 @@ void destroy_2D_arr(unsigned char** arr, size_t row){
 }
 
 //shift the array n bits left, you should make sure 0<=bits<=7
-void left_shift_mem(unsigned char* target, size_t target_size, unsigned int bits){
+void left_shift_mem(unsigned char* target, size_t target_size, uint8_t bits){
     unsigned char current, next;
     size_t i;
 
@@ -51,40 +76,23 @@ void left_shift_mem(unsigned char* target, size_t target_size, unsigned int bits
     target[target_size-1] = target[target_size-1] << bits;
 }
 
+void create_all_buffer(void){
+    binary_buffer = (unsigned char*) malloc(MAX_BINARY_BUFFER_SIZE);
+    if (! binary_buffer){log_error("fail to create binary buffer");}
 
-size_t load_buffer(FILE* file_stream, unsigned char** target, size_t target_size){
-    int i;
-    unsigned char* temp;
-    size_t buffer_size = 0;
-    temp = (unsigned char*) malloc(target_size);
-    if (! temp){log_error("can't allocate temp arr in load_buffer()");}
-    buffer_size = fread(temp, 1, target_size, file_stream);
-    if (buffer_size){
-        //shift the correct bit and copy temp into target
-        for (i=0;i<8;++i){
-            memcpy(target[i], temp, buffer_size);
-            left_shift_mem(temp, target_size, 1);
-        }
+    sync_data_buffer = (unsigned char*) malloc(SYNC_DATA_SIZE);
+    if (! sync_data_buffer){
+        log_error("fail to create sync data buffer");
     }
 
-    free(temp);
-    return buffer_size;
-}
-
-
-/*
-size_t load_buffer(FILE* file_stream, unsigned char** target, size_t target_size){
-    int i;
-    size_t buffer_size = 0;
-    buffer_size = fread(target[0], 1, target_size, file_stream);
-    if (buffer_size){
-        //shift the correct bit and copy temp into target
-        for (i=1;i<8;++i){
-            memcpy(target[i], target[0], buffer_size);
-            left_shift_mem(target[i], target_size, i);
-        }
+    event_buffer = (Event*) malloc(sizeof(Event));
+    if (! event_buffer){
+        log_error("fail to create event buffer");
     }
-
-    return buffer_size;
 }
-*/
+
+void destroy_all_buffer(void){
+    free(binary_buffer);
+    free(sync_data_buffer);
+    free(event_buffer);
+}

@@ -4,45 +4,194 @@
 #include "utility.h"
 #include "match_pattern.h"
 
-unsigned int bit_shift = 0;
+unsigned char* sync_data_buffer = NULL;
+Event* event_buffer = NULL;
+int sync_data_buffer_counter = 0;
+int missing_sync_data = 0;
 
 int is_sd_header(unsigned char* target){
-    static unsigned char target_copy[SD_header_SIZE];
-    static unsigned char ref_master[SD_header_SIZE]={0x88, 0x55, 0xC0, 0x00, 0x04, 0x4f};
-    static unsigned char ref_slave[SD_header_SIZE]={0x88, 0xAA, 0xC0, 0x00, 0x04, 0x4f};
+    static unsigned char target_copy[SD_HEADER_SIZE];
+    static unsigned char ref_master[SD_HEADER_SIZE]={0x88, 0x55, 0xC0, 0x00, 0x04, 0x4f};
+    static unsigned char ref_slave[SD_HEADER_SIZE]={0x88, 0xAA, 0xC0, 0x00, 0x04, 0x4f};
 
     //mask the sequence count byte
-    memcpy(target_copy, target, SD_header_SIZE);
+    memcpy(target_copy, target, SD_HEADER_SIZE);
     target_copy[3] = 0x00;
 
-    if (! memcmp(target_copy, ref_master, SD_header_SIZE)){return 1;}
-    if (! memcmp(target_copy, ref_slave, SD_header_SIZE)){return 1;}
+    if (! memcmp(target_copy, ref_master, SD_HEADER_SIZE)){return 1;}
+    if (! memcmp(target_copy, ref_slave, SD_HEADER_SIZE)){return 1;}
     return 0;
 }
 
-int find_next_sd_header(unsigned char** buffer, size_t current_sd_header_location){
-    unsigned int shift;
+int is_sync_header(unsigned char* target){
+    static unsigned char ref = 0xCA;
+    return (*target == ref);
+}
+
+int is_sync_tail(unsigned char* target){
+    static unsigned char ref[3] = {0xF2, 0xF5, 0xFA};
+    return (! memcmp(target, ref, 3));
+}
+
+static void parse_sync_data(unsigned char* target){
+    unsigned char* buffer;
+
+    buffer = (unsigned char*) malloc(2);
+    if (! buffer){log_error("can't allocate buffer in parse_sync_data()");}
+
+    //for now, only update pps count
+    memcpy(buffer, target + 1, 2);
+    buffer[0] = buffer[0] & 0x3F; //mask header and gtm module
+    big2little_endian(buffer, 2);
+    memcpy(&(event_buffer->pps_counter), buffer, 2);
+
+    free(buffer);
+}
+
+static void print_event_buffer(void){
+    printf("-----current event-----\n");
+    printf("gtm module = %i\n", event_buffer->gtm_module);
+    printf("pps counter = %u\n", event_buffer->pps_counter);
+    printf("fine counter = %u\n", event_buffer->fine_counter);
+    printf("citiroc id = %u\n", event_buffer->citiroc_id);
+    printf("channel id = %u\n", event_buffer->channel_id);
+    printf("energy filter = %u\n", event_buffer->energy_filter);
+    printf("adc value = %u\n", event_buffer->adc_value);
+    printf("------------------------\n");
+}
+
+static void parse_event_data(unsigned char* target){
+    static unsigned char ref_event_time = 0x80;
+    static unsigned char ref_event_adc = 0x40;
+    unsigned char* buffer = NULL;
+
+    if ((*target & 0xC0) == ref_event_time){
+        buffer = (unsigned char*) malloc(4);
+        if (! buffer){log_error("can't allocate buffer in parse_event_data()");}
+
+        buffer[0] = 0x00;
+        memcpy(&buffer[1], target, 3);
+        buffer[1] = buffer[1] & 0x3F;   //mask the header
+        big2little_endian(buffer, 4);
+        memcpy(&(event_buffer->fine_counter), buffer, 4);
+        free(buffer);
+        return;
+    }
+
+    if ((*target & 0xC0) == ref_event_adc){
+        event_buffer->gtm_module = (*target & 0x20) ? SLAVE : MASTER;
+        event_buffer->citiroc_id = (*target & 0x10) ? 1 : 0;
+        event_buffer->energy_filter = (*(target + 1) & 0x20) ? 1 : 0;
+
+        buffer = (unsigned char*) malloc(3);
+        if (! buffer){log_error("can't allocate buffer in parse_event_data()");}
+
+        //read channel id, it's spilt between bytes, maybe worth to fix that?
+        memcpy(buffer, target, 3);
+        left_shift_mem(buffer, 3, 4);
+        buffer[0] = buffer[0] >> 3;
+        memcpy(&(event_buffer->channel_id), buffer, 1);
+
+        //read adc value
+        memcpy(buffer, target + 1, 2);
+        buffer[0] = buffer[0] & 0x3F; //mask channel id and energy filter
+        big2little_endian(buffer, 2);
+        memcpy(&(event_buffer->adc_value), buffer, 2);
+
+        print_event_buffer();
+
+        free(buffer);
+        return;
+    }
+    log_error("neither event time nor event adc");
+}
+
+void unit_test(unsigned char* target){
+    check_endianness();
+    create_all_buffer();
+
+    event_buffer->gtm_module = 0;
+    event_buffer->pps_counter = 0;
+    event_buffer->fine_counter = 0;
+    event_buffer->citiroc_id = 0;
+    event_buffer->channel_id = 0;
+    event_buffer->energy_filter = 0;
+    event_buffer->adc_value = 0;
+
+    parse_sync_data(target);
+    print_event_buffer();
+
+    destroy_all_buffer();
+}
+
+int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size){
     size_t location, byte;
-    location = current_sd_header_location + SCIENCE_DATA_SIZE + SD_header_SIZE; // the size of sd header is 6
-    if (is_sd_header(buffer[bit_shift] + location)){
+    location = current_sd_header_location + SCIENCE_DATA_SIZE + SD_HEADER_SIZE; // the size of sd header is 6
+
+    if (location + SD_HEADER_SIZE > actual_buffer_size){
+        location = actual_buffer_size - SD_HEADER_SIZE;
+    }
+
+    if (is_sd_header(buffer + location)){
         return location;
     }
     else{
         //look backward
-        byte = SCIENCE_DATA_SIZE;
+        byte = location - current_sd_header_location ;
         while (byte--)
         {
             location--;
-            //inspect each bit shift
-            for (shift=0;shift<8;shift++){
-                if (is_sd_header(buffer[shift] + location)){
-                    bit_shift = shift;
-                    return location;
-                }
+            if (is_sd_header(buffer + location)){
+                return location;
             }
         }
         //if no next sd header is found
         log_error("no next sd header");
         return 0;
+    }
+}
+
+void parse_full_science_packet(unsigned char* buffer, size_t start){
+    int i;
+    unsigned char* current_location;
+
+    //parse data based on word (3 bytes)
+    for (i=0;i<SCIENCE_DATA_SIZE / 3;++i){
+        current_location = buffer + 3 * i;
+
+        // always look for sync data header
+        if (is_sync_header(current_location)){
+            missing_sync_data = 1;
+            sync_data_buffer_counter = 0;
+            memcpy(sync_data_buffer, current_location, 3);
+        }
+
+        if (missing_sync_data){
+            //the body of sync data
+            if (sync_data_buffer_counter < SYNC_DATA_SIZE - 1){
+                sync_data_buffer_counter += 3;
+                memcpy(sync_data_buffer + sync_data_buffer_counter, current_location, 3);
+            }
+            //the tail of the sync data
+            else{
+                if (is_sync_tail(current_location)){
+                    missing_sync_data = 0;
+                    sync_data_buffer_counter += 3;
+                    memcpy(sync_data_buffer, current_location, 3);
+
+                    log_message("update sync data");
+                    parse_sync_data(sync_data_buffer);
+                }
+                //if the tail is missing, keep finding the next sync data header
+                else{
+                    log_message("missing tail");
+                    missing_sync_data = 1;
+                    sync_data_buffer_counter = 0;
+                }
+            }
+        }
+        else{
+            parse_event_data(current_location);
+        }
     }
 }
