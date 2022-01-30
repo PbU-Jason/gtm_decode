@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include "utility.h"
 #include "match_pattern.h"
-#include "shared.h"
 
 unsigned char* sync_data_buffer = NULL;
 Event* event_buffer = NULL;
@@ -25,12 +24,12 @@ int is_sd_header(unsigned char* target){
     return 0;
 }
 
-int is_sync_header(unsigned char* target){
+static int is_sync_header(unsigned char* target){
     static unsigned char ref = 0xCA;
     return (*target == ref);
 }
 
-int is_sync_tail(unsigned char* target){
+static int is_sync_tail(unsigned char* target){
     static unsigned char ref[3] = {0xF2, 0xF5, 0xFA};
     //printf("%02x\n", *target);
     return (! memcmp(target, ref, 3));
@@ -63,6 +62,10 @@ static void print_event_buffer(void){
     printf("------------------------\n");
 }
 
+static void write_event_time(void){
+    fprintf(out_file, "%10u\n", event_buffer->fine_counter);
+}
+
 static void write_event_buffer(void){
     fprintf(out_file, "%5u;", event_buffer->pps_counter);
     fprintf(out_file, "%10u;", event_buffer->fine_counter);
@@ -81,7 +84,7 @@ static void parse_event_data(unsigned char* target){
     static unsigned char ref_event_adc = 0x40;
     unsigned char* buffer = NULL;
 
-    if ((*target & 0xC0) == ref_event_time){
+    if ((*target & 0xC0) == ref_event_time){    //event time data
         buffer = (unsigned char*) malloc(4);
         if (! buffer){log_error("can't allocate buffer in parse_event_data()");}
 
@@ -91,11 +94,12 @@ static void parse_event_data(unsigned char* target){
         big2little_endian(buffer, 4);
         memcpy(&(event_buffer->fine_counter), buffer, 4);
         free(buffer);
+        write_event_time();
         //log_message("update event time");
         return;
     }
 
-    if ((*target & 0xC0) == ref_event_adc){ //ignore 0 hit data
+    if ((*target & 0xC0) == ref_event_adc){ //event adc data with 1 hit
         event_buffer->gtm_module = (*target & 0x20) ? SLAVE : MASTER;
         event_buffer->citiroc_id = (*target & 0x10) ? 1 : 0;
         event_buffer->energy_filter = (*(target + 1) & 0x20) ? 1 : 0;
@@ -103,7 +107,7 @@ static void parse_event_data(unsigned char* target){
         buffer = (unsigned char*) malloc(3);
         if (! buffer){log_error("can't allocate buffer in parse_event_data()");}
 
-        //read channel id, it's spilt between bytes, maybe worth to fix that?
+        //read channel id, it's spilt between bytes, maybe worth fixing that?
         memcpy(buffer, target, 3);
         left_shift_mem(buffer, 3, 4);
         buffer[0] = buffer[0] >> 3;
@@ -117,8 +121,6 @@ static void parse_event_data(unsigned char* target){
         free(buffer);
 
         write_event_buffer();
-        //log_message("update event adc");
-        //print_event_buffer();
         return;
     }
 }

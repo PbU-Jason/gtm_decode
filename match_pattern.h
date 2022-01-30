@@ -29,7 +29,6 @@ extern Event* event_buffer;
 extern int missing_sync_data;
 extern int got_first_sync_data;
 
-
 int is_sd_header(unsigned char* target);
 int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size);
 void parse_full_science_packet(unsigned char* buffer);

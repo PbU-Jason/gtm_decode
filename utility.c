@@ -6,6 +6,8 @@
 #include "match_pattern.h"
 
 unsigned char* binary_buffer = NULL;
+FILE* bin_file = NULL;
+FILE* out_file = NULL;
 
 void log_message(char* description){
     printf("Message: ");
@@ -105,3 +107,19 @@ void print_buffer_around(unsigned char* target, int back, int forward){
     }
     printf("\n-------------------------------\n");
 }
+
+void open_all_file(void){
+     bin_file = fopen("/home/ian/Documents/code/gtm/decode/Data_151222.368.bin", "rb");
+    if (! bin_file){log_error("binary file not found");}
+    log_message("finish loading bin file");
+
+    out_file = fopen("/home/ian/Documents/code/gtm/decode/test_out.txt", "w");
+    if (! out_file){log_error("can't open output file");}
+    log_message("finish opening output file");
+}
+
+void close_all_file(void){
+    fclose(bin_file);
+    fclose(out_file);
+}
+
