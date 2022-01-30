@@ -35,6 +35,10 @@ static int is_sync_tail(unsigned char* target){
     return (! memcmp(target, ref, 3));
 }
 
+static void write_sync_data(void){
+    fprintf(out_file, "sync data pps count: %5u\n", event_buffer->pps_counter);
+}
+
 static void parse_sync_data(unsigned char* target){
     unsigned char* buffer;
 
@@ -48,6 +52,7 @@ static void parse_sync_data(unsigned char* target){
     memcpy(&(event_buffer->pps_counter), buffer, 2);
 
     free(buffer);
+    write_sync_data();
 }
 
 static void print_event_buffer(void){
@@ -63,10 +68,11 @@ static void print_event_buffer(void){
 }
 
 static void write_event_time(void){
-    fprintf(out_file, "%10u\n", event_buffer->fine_counter);
+    fprintf(out_file, "event time fine count: %10u\n", event_buffer->fine_counter);
 }
 
 static void write_event_buffer(void){
+    fprintf(out_file, "event adc data: ");
     fprintf(out_file, "%5u;", event_buffer->pps_counter);
     fprintf(out_file, "%10u;", event_buffer->fine_counter);
     if (event_buffer->gtm_module){fprintf(out_file, "Slave;");}
