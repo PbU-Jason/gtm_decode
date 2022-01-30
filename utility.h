@@ -16,4 +16,5 @@ void destroy_2D_arr(unsigned char** arr, size_t row);
 void left_shift_mem(unsigned char* target_start, size_t target_size, uint8_t bits);
 void create_all_buffer(void);
 void destroy_all_buffer(void);
+void print_buffer_around(unsigned char* target, int back, int forward);
 #endif

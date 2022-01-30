@@ -96,3 +96,12 @@ void destroy_all_buffer(void){
     free(sync_data_buffer);
     free(event_buffer);
 }
+
+void print_buffer_around(unsigned char* target, int back, int forward){
+    int i;
+    printf("debug print --------------------\n");
+    for (i=-back;i<=forward;++i){
+        printf("%02x ", *(target + i));
+    }
+    printf("\n-------------------------------\n");
+}
