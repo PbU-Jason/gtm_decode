@@ -4,11 +4,17 @@
 #include "utility.h"
 #include "match_pattern.h"
 
+
+//global variables
 unsigned char* sync_data_buffer = NULL;
 Event* event_buffer = NULL;
 int sync_data_buffer_counter = 0;
 int missing_sync_data = 0;
 int got_first_sync_data = 0;
+int continuous_packet = 1;
+
+//others
+uint8_t sequence_count = 0;
 
 int is_sd_header(unsigned char* target){
     static unsigned char target_copy[SD_HEADER_SIZE];
@@ -22,6 +28,17 @@ int is_sd_header(unsigned char* target){
     if (! memcmp(target_copy, ref_master, SD_HEADER_SIZE)){return 1;}
     if (! memcmp(target_copy, ref_slave, SD_HEADER_SIZE)){return 1;}
     return 0;
+}
+
+void parse_sd_header(unsigned char* target){
+    uint8_t new_sequence_count;
+    //parse sequence count and check packet continuity
+    memcpy(&new_sequence_count, target + 3, 1);
+    continuous_packet = (new_sequence_count == sequence_count + 1); //overflow is intended
+    sequence_count = new_sequence_count;
+
+    //beacuse currently all sequence count is locked
+    continuous_packet = 1;
 }
 
 static int is_sync_header(unsigned char* target){
@@ -150,38 +167,34 @@ void unit_test(unsigned char* target){
 }
 
 int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size){
-    size_t location, byte;
-    location = current_sd_header_location + SCIENCE_DATA_SIZE + SD_HEADER_SIZE; // the size of sd header is 6
+    size_t location, i;
 
-    if (location + SD_HEADER_SIZE > actual_buffer_size){
+    //no space for next science data header
+    if (current_sd_header_location + 2 * SCIENCE_DATA_SIZE > actual_buffer_size){
+        return -1;
+    }
+
+    location = current_sd_header_location + SCIENCE_DATA_SIZE + SD_HEADER_SIZE;
+    if (location > actual_buffer_size){
         location = actual_buffer_size - SD_HEADER_SIZE;
     }
 
-    if (is_sd_header(buffer + location)){
-        return location;
-    }
-    else{
-        //look backward
-        byte = location - current_sd_header_location ;
-        while (byte--)
-        {
-            location--;
-            if (is_sd_header(buffer + location)){
-                return location;
-            }
+    for (i = location; i>=current_sd_header_location + SD_HEADER_SIZE; i--){
+        if (is_sd_header(buffer + location)){
+            return location;
         }
-        //if no next sd header is found
-        log_error("no next sd header");
-        return 0;
     }
+
+    //no next sd header is found
+    return -1;
 }
 
-void parse_full_science_packet(unsigned char* buffer){
+void parse_science_packet(unsigned char* buffer, size_t max_location){
     int i;
     unsigned char* current_location;
 
     //parse data based on word (3 bytes)
-    for (i=0;i<SCIENCE_DATA_SIZE / 3;++i){
+    for (i=0;i<max_location / 3;++i){
         current_location = buffer + 3 * i;
 
         // always look for sync data header

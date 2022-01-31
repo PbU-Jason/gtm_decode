@@ -28,10 +28,12 @@ extern unsigned char* sync_data_buffer;
 extern Event* event_buffer;
 extern int missing_sync_data;
 extern int got_first_sync_data;
+extern int continuous_packet;
 
 int is_sd_header(unsigned char* target);
+void parse_sd_header(unsigned char* target);
 int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size);
-void parse_full_science_packet(unsigned char* buffer);
+void parse_science_packet(unsigned char* buffer, size_t max_location);
 
 void unit_test(unsigned char* target);
 #endif
