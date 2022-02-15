@@ -5,7 +5,7 @@
 #include "utility.h"
 #include "match_pattern.h"
 
-size_t max_binary_buffer_size = 1174405120;
+size_t max_binary_buffer_size = 1174405120; //1GB
 unsigned char* binary_buffer = NULL;
 FILE* bin_file = NULL;
 FILE* out_file = NULL;
