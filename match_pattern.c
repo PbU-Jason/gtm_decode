@@ -30,10 +30,24 @@ int is_sd_header(unsigned char* target){
     return 0;
 }
 
+static void write_sd_header(uint8_t sequence_count){
+    fprintf(out_file, "sd header: %3u\n", sequence_count);
+}
+
 void parse_sd_header(unsigned char* target){
+    static int got_first_sd_header = 0;
     uint8_t new_sequence_count;
     //parse sequence count and check packet continuity
     memcpy(&new_sequence_count, target + 3, 1);
+
+    write_sd_header(new_sequence_count);
+
+    if (! got_first_sd_header){
+        sequence_count = new_sequence_count;
+        got_first_sd_header = 1;
+        return;
+    }
+    //make sure the sequence count is continuous
     if (sequence_count == 255){
         continuous_packet = (new_sequence_count == 0); //overflow is intended
     }
@@ -43,13 +57,10 @@ void parse_sd_header(unsigned char* target){
 
     if (! continuous_packet){
         log_message("uncontinuous packet");
-        printf("old = %i, new = %i\n", sequence_count, new_sequence_count);
+        printf("old sequence count = %i, new seqence count= %i\n", sequence_count, new_sequence_count);
     }
 
     sequence_count = new_sequence_count;
-
-    ////beacuse currently all sequence count is locked
-    //continuous_packet = 1;
 }
 
 static int is_sync_header(unsigned char* target){
