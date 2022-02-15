@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define MAX_BINARY_BUFFER_SIZE 1174405120   //in bytes
+extern size_t max_binary_buffer_size;   //in bytes
 
 extern unsigned char* binary_buffer;
 extern FILE* bin_file;
@@ -19,6 +19,6 @@ void left_shift_mem(unsigned char* target_start, size_t target_size, uint8_t bit
 void create_all_buffer(void);
 void destroy_all_buffer(void);
 void print_buffer_around(unsigned char* target, int back, int forward);
-void open_all_file(void);
+void open_all_file(char* input_file_path, char* out_file_path);
 void close_all_file(void);
 #endif

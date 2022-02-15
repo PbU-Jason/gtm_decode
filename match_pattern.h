@@ -16,6 +16,7 @@ typedef struct Event
 {
     Gtm_module gtm_module;
     uint16_t pps_counter;
+    uint8_t cmd_seq_num;    //CMD-SAD sequence number
     uint32_t fine_counter;
     uint8_t citiroc_id;
     uint8_t channel_id;

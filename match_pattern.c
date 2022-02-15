@@ -34,11 +34,22 @@ void parse_sd_header(unsigned char* target){
     uint8_t new_sequence_count;
     //parse sequence count and check packet continuity
     memcpy(&new_sequence_count, target + 3, 1);
-    continuous_packet = (new_sequence_count == sequence_count + 1); //overflow is intended
+    if (sequence_count == 255){
+        continuous_packet = (new_sequence_count == 0); //overflow is intended
+    }
+    else{
+        continuous_packet = (new_sequence_count == sequence_count + 1); //overflow is intended
+    }
+
+    if (! continuous_packet){
+        log_message("uncontinuous packet");
+        printf("old = %i, new = %i\n", sequence_count, new_sequence_count);
+    }
+
     sequence_count = new_sequence_count;
 
-    //beacuse currently all sequence count is locked
-    continuous_packet = 1;
+    ////beacuse currently all sequence count is locked
+    //continuous_packet = 1;
 }
 
 static int is_sync_header(unsigned char* target){
@@ -53,7 +64,7 @@ static int is_sync_tail(unsigned char* target){
 }
 
 static void write_sync_data(void){
-    fprintf(out_file, "sync data pps count: %5u\n", event_buffer->pps_counter);
+    fprintf(out_file, "sync: %5u, %3u\n", event_buffer->pps_counter, event_buffer->cmd_seq_num);
 }
 
 static void parse_sync_data(unsigned char* target){
@@ -62,11 +73,14 @@ static void parse_sync_data(unsigned char* target){
     buffer = (unsigned char*) malloc(2);
     if (! buffer){log_error("can't allocate buffer in parse_sync_data()");}
 
-    //for now, only update pps count
+    //pps count
     memcpy(buffer, target + 1, 2);
     buffer[0] = buffer[0] & 0x3F; //mask header and gtm module
     big2little_endian(buffer, 2);
     memcpy(&(event_buffer->pps_counter), buffer, 2);
+
+    //CMD-SAD sequence number
+    memcmp(buffer + 24, &(event_buffer->cmd_seq_num), 1);
 
     free(buffer);
     write_sync_data();
@@ -85,21 +99,12 @@ static void print_event_buffer(void){
 }
 
 static void write_event_time(void){
-    fprintf(out_file, "event time fine count: %10u\n", event_buffer->fine_counter);
+    fprintf(out_file, "event time: %10u\n", event_buffer->fine_counter);
 }
 
 static void write_event_buffer(void){
-    fprintf(out_file, "event adc data: ");
-    fprintf(out_file, "%5u;", event_buffer->pps_counter);
-    fprintf(out_file, "%10u;", event_buffer->fine_counter);
-    if (event_buffer->gtm_module){fprintf(out_file, "Slave;");}
-    else{fprintf(out_file, "Master;");}
-    if (event_buffer->citiroc_id){fprintf(out_file, "B;");}
-    else{fprintf(out_file, "A;");}
-    fprintf(out_file, "%3u;", event_buffer->channel_id);
-    if (event_buffer->energy_filter){fprintf(out_file, "HG;");}
-    else{fprintf(out_file, "LG;");}
-    fprintf(out_file, "%5u\n", event_buffer->adc_value);
+    fprintf(out_file, "event adc: ");
+    fprintf(out_file, "%5u;%10u;%1u;%1u;%3u;%1u;%5u\n", event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id,event_buffer->energy_filter,event_buffer->adc_value);
 }
 
 static void parse_event_data(unsigned char* target){
@@ -169,17 +174,15 @@ void unit_test(unsigned char* target){
 int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size){
     size_t location, i;
 
-    //no space for next science data header
-    if (current_sd_header_location + 2 * SCIENCE_DATA_SIZE > actual_buffer_size){
-        return -1;
-    }
-
+    //quick check 
     location = current_sd_header_location + SCIENCE_DATA_SIZE + SD_HEADER_SIZE;
-    if (location > actual_buffer_size){
-        location = actual_buffer_size - SD_HEADER_SIZE;
+    if (location <= actual_buffer_size - SD_HEADER_SIZE){
+        if (is_sd_header(buffer + location)){
+            return location;
+        }
     }
 
-    for (i = location; i>=current_sd_header_location + SD_HEADER_SIZE; i--){
+    for (location = current_sd_header_location + SD_HEADER_SIZE; location <= actual_buffer_size - SD_HEADER_SIZE; location++){
         if (is_sd_header(buffer + location)){
             return location;
         }

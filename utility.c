@@ -5,6 +5,7 @@
 #include "utility.h"
 #include "match_pattern.h"
 
+size_t max_binary_buffer_size = 1174405120;
 unsigned char* binary_buffer = NULL;
 FILE* bin_file = NULL;
 FILE* out_file = NULL;
@@ -79,7 +80,7 @@ void left_shift_mem(unsigned char* target, size_t target_size, uint8_t bits){
 }
 
 void create_all_buffer(void){
-    binary_buffer = (unsigned char*) malloc(MAX_BINARY_BUFFER_SIZE);
+    binary_buffer = (unsigned char*) malloc(max_binary_buffer_size);
     if (! binary_buffer){log_error("fail to create binary buffer");}
 
     sync_data_buffer = (unsigned char*) malloc(SYNC_DATA_SIZE);
@@ -108,12 +109,12 @@ void print_buffer_around(unsigned char* target, int back, int forward){
     printf("\n-------------------------------\n");
 }
 
-void open_all_file(void){
-     bin_file = fopen("/home/ian/Documents/code/gtm/decode/Data_151222.368.bin", "rb");
+void open_all_file(char* input_file_path, char* out_file_path){
+     bin_file = fopen(input_file_path, "rb");
     if (! bin_file){log_error("binary file not found");}
     log_message("finish loading bin file");
 
-    out_file = fopen("/home/ian/Documents/code/gtm/decode/test_out.txt", "w");
+    out_file = fopen(out_file_path, "w");
     if (! out_file){log_error("can't open output file");}
     log_message("finish opening output file");
 }
