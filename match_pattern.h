@@ -25,6 +25,24 @@ typedef struct Event
     uint16_t adc_value;
 } Event;
 
+typedef struct Tmtc
+{
+    Gtm_module gtm_module;
+    uint16_t packet_counter;
+    uint16_t pps_counter;
+    uint16_t fine_counter;
+    uint8_t board_temp1;
+    uint8_t board_temp2;
+    uint8_t citiroc1_temp1;
+    uint8_t citiroc1_temp2;
+    uint8_t citiroc2_temp1;
+    uint8_t citiroc2_temp2;
+    uint32_t citiroc1_livetime;
+    uint32_t citiroc2_livetime;
+    uint8_t citiroc1_hit[32];
+    uint8_t citiroc2_hit[32];
+} Tmtc;
+
 extern int sync_data_buffer_counter;
 extern unsigned char* sync_data_buffer;
 extern int tmtc_data_buffer_counter;

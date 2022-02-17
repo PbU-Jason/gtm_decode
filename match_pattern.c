@@ -247,3 +247,25 @@ void parse_science_packet(unsigned char* buffer, size_t max_location){
     }
 
 }
+
+int is_tmtc_header(unsigned char* target){
+    static unsigned char ref[2] = {0x55, 0xAA};
+
+    if (! memcmp(ref, target, 2)){
+        return 1;
+    }
+    return 0;
+}
+
+int is_tmtc_tail(unsigned char* targrt){
+    static unsigned char ref[2] = {0xFB, 0xF2};
+
+    if (! memcmp(ref, targrt, 2)){
+        return 1;
+    }
+    return 0;
+}
+
+void parse_tmtc_data(unsigned char* target){
+    
+}
