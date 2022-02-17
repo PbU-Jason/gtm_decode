@@ -6,6 +6,7 @@
 #include "match_pattern.h"
 
 size_t max_binary_buffer_size = 1174405120; //1GB
+int decode_mode=0;
 unsigned char* binary_buffer = NULL;
 FILE* bin_file = NULL;
 FILE* out_file = NULL;
@@ -88,6 +89,11 @@ void create_all_buffer(void){
         log_error("fail to create sync data buffer");
     }
 
+    tmtc_data_buffer = (unsigned char*) malloc(TMTC_DATA_SIZE);
+    if (! tmtc_data_buffer){
+        log_error("fail to create tmtc data buffer");
+    }
+
     event_buffer = (Event*) malloc(sizeof(Event));
     if (! event_buffer){
         log_error("fail to create event buffer");
@@ -97,6 +103,7 @@ void create_all_buffer(void){
 void destroy_all_buffer(void){
     free(binary_buffer);
     free(sync_data_buffer);
+    free(tmtc_data_buffer);
     free(event_buffer);
 }
 

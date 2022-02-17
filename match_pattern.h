@@ -4,6 +4,7 @@
 #define SCIENCE_DATA_SIZE 1104
 #define SD_HEADER_SIZE 6
 #define SYNC_DATA_SIZE 45
+#define TMTC_DATA_SIZE 128
 #define INI_PPS_COUNTER 0
 #define INI_FINE_COUNTER 0
 
@@ -26,6 +27,8 @@ typedef struct Event
 
 extern int sync_data_buffer_counter;
 extern unsigned char* sync_data_buffer;
+extern int tmtc_data_buffer_counter;
+extern unsigned char* tmtc_data_buffer;
 extern Event* event_buffer;
 extern int missing_sync_data;
 extern int got_first_sync_data;

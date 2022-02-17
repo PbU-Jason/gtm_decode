@@ -2,9 +2,10 @@
 #define UTILITY_H
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 
 extern size_t max_binary_buffer_size;   //in bytes
-
+extern int decode_mode;
 extern unsigned char* binary_buffer;
 extern FILE* bin_file;
 extern FILE* out_file;

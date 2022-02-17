@@ -7,8 +7,10 @@
 
 //global variables
 unsigned char* sync_data_buffer = NULL;
+unsigned char* tmtc_data_buffer = NULL;
 Event* event_buffer = NULL;
 int sync_data_buffer_counter = 0;
+int tmtc_data_buffer_counter = 0;
 int missing_sync_data = 0;
 int got_first_sync_data = 0;
 int continuous_packet = 1;
@@ -91,7 +93,7 @@ static void parse_sync_data(unsigned char* target){
     memcpy(&(event_buffer->pps_counter), buffer, 2);
 
     //CMD-SAD sequence number
-    memcmp(buffer + 24, &(event_buffer->cmd_seq_num), 1);
+    memcpy(&(event_buffer->cmd_seq_num), buffer + 24, 1);
 
     free(buffer);
     write_sync_data();
@@ -183,7 +185,7 @@ void unit_test(unsigned char* target){
 }
 
 int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size){
-    size_t location, i;
+    size_t location;
 
     //quick check 
     location = current_sd_header_location + SCIENCE_DATA_SIZE + SD_HEADER_SIZE;

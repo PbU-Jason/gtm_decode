@@ -11,6 +11,7 @@ char args_doc[] = "use --help flag to see more detail";
 static struct argp_option options[] = {
   {"input", 'i', "FILE", 0, "The input binary file" },
   {"output", 'o', "FILE", 0, "The output file" },
+  {"decode-mode", 'm', "Num", 0, "the decode mode"},
   {"buffer-size", 'b', "Bytes", OPTION_ARG_OPTIONAL , "The max buffer size while loading the binary file. The defalt size is xxx bytes" },
 };
 
@@ -22,6 +23,11 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state){
       break;
     case 'o':
       output_file_path = arg;
+      break;
+    case 'm':
+      if (! sscanf(arg, "%u", &decode_mode)){
+        log_error("can't parse decode mode");
+      }
       break;
     case 'b':
       if (! sscanf(arg, "%zu", &max_binary_buffer_size)){
