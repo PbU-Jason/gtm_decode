@@ -6,7 +6,8 @@
 #include "match_pattern.h"
 
 size_t max_binary_buffer_size = 1174405120; //1GB
-int decode_mode=0;
+int decode_mode = 0;
+int terminal_out = 0;
 unsigned char* binary_buffer = NULL;
 FILE* bin_file = NULL;
 FILE* out_file = NULL;
@@ -123,13 +124,18 @@ void print_buffer_around(unsigned char* target, int back, int forward){
 }
 
 void open_all_file(char* input_file_path, char* out_file_path){
-     bin_file = fopen(input_file_path, "rb");
+    bin_file = fopen(input_file_path, "rb");
     if (! bin_file){log_error("binary file not found");}
     log_message("finish loading bin file");
 
-    out_file = fopen(out_file_path, "w");
-    if (! out_file){log_error("can't open output file");}
-    log_message("finish opening output file");
+    if (terminal_out){
+        out_file = stdout;
+    }
+    else{
+        out_file = fopen(out_file_path, "w");
+        if (! out_file){log_error("can't open output file");}
+        log_message("finish opening output file");
+    }
 }
 
 void close_all_file(void){

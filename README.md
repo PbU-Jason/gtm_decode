@@ -15,11 +15,13 @@ GTM decoder -- decode GTM binary file to human readable data
 note: this is a testing version!!
 
   -b, --buffer-size[=Bytes]  The max buffer size while loading the binary file.
-                             The defalt size is xxx bytes
+                             The defalt size is 1 GB
   -i, --input=FILE           The input binary file
   -m, --decode-mode=Num      the decode mode, 0 = decode science data, 1 =
                              decode telemetry data
   -o, --output=FILE          The output file
+  -t, --terminal-out         deocder will ignore output file and dump all the
+                             results into terminal
   -?, --help                 Give this help list
       --usage                Give a short usage message
 

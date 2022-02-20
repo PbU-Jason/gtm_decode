@@ -6,6 +6,7 @@
 
 extern size_t max_binary_buffer_size;   //in bytes
 extern int decode_mode;
+extern int terminal_out;
 extern unsigned char* binary_buffer;
 extern FILE* bin_file;
 extern FILE* out_file;
