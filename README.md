@@ -10,6 +10,7 @@ cd gtm_decode
 gcc *.c -o gtm_decoder -O3 
 ```
 ## Use
+```
 GTM decoder -- decode GTM binary file to human readable data
 note: this is a testing version!!
 
@@ -24,6 +25,7 @@ note: this is a testing version!!
 
 Mandatory or optional arguments to long options are also mandatory or optional
 for any corresponding short options.
+```
 ## Output file format
 ### Science data
 ```
