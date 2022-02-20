@@ -77,7 +77,7 @@ int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location
 void parse_science_packet(unsigned char* buffer, size_t max_location);
 int is_tmtc_header(unsigned char* target);
 int is_tmtc_tail(unsigned char* targrt);
-void parse_telemetry_packet(unsigned char* target);
+void parse_tmtc_packet(unsigned char* target);
 
 void unit_test(unsigned char* target);
 #endif

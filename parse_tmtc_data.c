@@ -31,7 +31,7 @@ void parse_tmtc_data(void){
                     log_message("tmtc tail missing!!");
                 }
                 else{   //tmtc data is all fine
-                    parse_telemetry_packet(tmtc_data_buffer);
+                    parse_tmtc_packet(tmtc_data_buffer);
                 }
                 tmtc_data_buffer_counter = 0;
             }
