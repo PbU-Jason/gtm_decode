@@ -9,6 +9,7 @@
 unsigned char* sync_data_buffer = NULL;
 unsigned char* tmtc_data_buffer = NULL;
 Event* event_buffer = NULL;
+Tmtc* tmtc_buffer;
 int sync_data_buffer_counter = 0;
 int tmtc_data_buffer_counter = 0;
 int missing_sync_data = 0;
@@ -266,6 +267,82 @@ int is_tmtc_tail(unsigned char* targrt){
     return 0;
 }
 
-void parse_tmtc_data(unsigned char* target){
-    
+void write_tmtc_buffer(void){
+    int i;
+
+    fprintf(out_file, "%3u;%5u;%5u;%10u;%3u;%3u;%3u;%3u;%3u;%3u;%10u;%10u", tmtc_buffer->gtm_module,tmtc_buffer->packet_counter,tmtc_buffer->pps_counter,tmtc_buffer->fine_counter,tmtc_buffer->board_temp1,tmtc_buffer->board_temp2,tmtc_buffer->citiroc1_temp1,tmtc_buffer->citiroc1_temp2,tmtc_buffer->citiroc2_temp1,tmtc_buffer->citiroc2_temp2,tmtc_buffer->citiroc1_livetime,tmtc_buffer->citiroc2_livetime);
+    for (i=0;i<32;++i){
+        fprintf(out_file, ";%3u", tmtc_buffer->citiroc1_hit[i]);
+    }
+    for (i=0;i<32;++i){
+        fprintf(out_file, ";%3u", tmtc_buffer->citiroc2_hit[i]);
+    }
+    fprintf(out_file, ";%5u;%5u;%3u;%3u;%3u;%3u;%3u;%3u;%3u;%5u;%5u;%3u;%3u;%3u;%5u;%5u;%5u;%3u\n", tmtc_buffer->citiroc1_trigger, tmtc_buffer->citiroc2_trigger, tmtc_buffer->counter_period, tmtc_buffer->hv_dac1, tmtc_buffer->hv_dac2, tmtc_buffer->spw_a_error_count, tmtc_buffer->spw_b_error_count, tmtc_buffer->spw_a_last_receive, tmtc_buffer->spw_b_last_receive,tmtc_buffer->spw_a_status, tmtc_buffer->spw_b_status, tmtc_buffer->recv_checksum, tmtc_buffer->calc_checksum, tmtc_buffer->recv_checksum, tmtc_buffer->seu1, tmtc_buffer->seu2, tmtc_buffer->seu3, tmtc_buffer->checksum);
+}
+
+void parse_telemetry_packet(unsigned char* target){
+    int i;
+
+    tmtc_buffer->gtm_module = (*(target + 2) == 0x02)? 0 : 1;
+    //packet counter
+    memcpy(&(tmtc_buffer->packet_counter), target + 3, 2);
+    big2little_endian(&(tmtc_buffer->packet_counter), 2);
+    //pps_counter
+    memcpy(&(tmtc_buffer->pps_counter), target + 15, 2);
+    big2little_endian(&(tmtc_buffer->pps_counter), 2);
+    //fine counter
+    memcpy(&(tmtc_buffer->fine_counter), target + 17, 3);
+    tmtc_buffer->fine_counter = tmtc_buffer->fine_counter >> 8;
+    big2little_endian(&(tmtc_buffer->fine_counter), 4);
+    //board temp
+    memcpy(&(tmtc_buffer->board_temp1), target + 20, 1);
+    memcpy(&(tmtc_buffer->board_temp2), target + 21, 1);
+    //citiroc temp
+    memcpy(&(tmtc_buffer->citiroc1_temp1), target + 22, 1);
+    memcpy(&(tmtc_buffer->citiroc1_temp2), target + 23, 1);
+    memcpy(&(tmtc_buffer->citiroc2_temp1), target + 24, 1);
+    memcpy(&(tmtc_buffer->citiroc2_temp2), target + 25, 1);
+    //citiroc livetime
+    memcpy(&(tmtc_buffer->citiroc1_livetime), target + 26, 3);
+    tmtc_buffer->citiroc1_livetime = tmtc_buffer->citiroc1_livetime >> 8;
+    memcpy(&(tmtc_buffer->citiroc2_livetime), target + 29, 3);
+    tmtc_buffer->citiroc2_livetime = tmtc_buffer->citiroc2_livetime >> 8;
+    //citiroc hit
+    for (i=0;i<32;++i){
+        memcpy(&(tmtc_buffer->citiroc1_hit[i]), target + 32 + i, 1);
+        memcpy(&(tmtc_buffer->citiroc2_hit[i]), target + 64 + i, 1);
+    }
+    //citiroc trigger
+    memcpy(&(tmtc_buffer->citiroc1_trigger), target + 96, 2);
+    big2little_endian(&(tmtc_buffer->citiroc1_hit), 2);
+    memcpy(&(tmtc_buffer->citiroc2_trigger), target + 98, 2);
+    big2little_endian(&(tmtc_buffer->citiroc2_hit), 2);
+    //counter period
+    memcpy(&(tmtc_buffer->counter_period), target + 100, 1);
+    //hv dac
+    memcpy(&(tmtc_buffer->hv_dac1), target + 101, 1);
+    memcpy(&(tmtc_buffer->hv_dac2), target + 102, 1);
+    //spw stuff
+    memcpy(&(tmtc_buffer->spw_a_error_count), target + 103, 1);
+    memcpy(&(tmtc_buffer->spw_a_last_receive), target + 104, 1);
+    memcpy(&(tmtc_buffer->spw_b_error_count), target + 105, 1);
+    memcpy(&(tmtc_buffer->spw_b_last_receive), target + 106, 1);
+    memcpy(&(tmtc_buffer->spw_a_status), target + 107, 1);
+    memcpy(&(tmtc_buffer->spw_b_status), target + 109, 1);
+    //checksum
+    memcpy(&(tmtc_buffer->recv_checksum), target + 111, 1);
+    memcpy(&(tmtc_buffer->calc_checksum), target + 112, 1);
+    //recv num
+    memcpy(&(tmtc_buffer->recv_num), target + 113, 1);
+    //seu measurement
+    memcpy(&(tmtc_buffer->seu1), target + 119, 2);
+    big2little_endian(&(tmtc_buffer->seu1), 2);
+    memcpy(&(tmtc_buffer->seu2), target + 121, 2);
+    big2little_endian(&(tmtc_buffer->seu2), 2);
+    memcpy(&(tmtc_buffer->seu3), target + 123, 2);
+    big2little_endian(&(tmtc_buffer->seu3), 2);
+    //checksum
+    memcpy(&(tmtc_buffer->checksum), target + 125, 1);
+
+    write_tmtc_buffer();
 }

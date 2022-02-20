@@ -98,6 +98,11 @@ void create_all_buffer(void){
     if (! event_buffer){
         log_error("fail to create event buffer");
     }
+
+    tmtc_buffer = (Tmtc*) malloc(sizeof(Tmtc));
+    if (! tmtc_buffer){
+        log_error("fail to create tmtc buffer");
+    }
 }
 
 void destroy_all_buffer(void){
@@ -105,6 +110,7 @@ void destroy_all_buffer(void){
     free(sync_data_buffer);
     free(tmtc_data_buffer);
     free(event_buffer);
+    free(tmtc_buffer);
 }
 
 void print_buffer_around(unsigned char* target, int back, int forward){

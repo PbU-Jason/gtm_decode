@@ -11,8 +11,9 @@ char args_doc[] = "use --help flag to see more detail";
 static struct argp_option options[] = {
   {"input", 'i', "FILE", 0, "The input binary file" },
   {"output", 'o', "FILE", 0, "The output file" },
-  {"decode-mode", 'm', "Num", 0, "the decode mode"},
+  {"decode-mode", 'm', "Num", 0, "the decode mode, 0 = decode science data, 1 = decode telemetry data"},
   {"buffer-size", 'b', "Bytes", OPTION_ARG_OPTIONAL , "The max buffer size while loading the binary file. The defalt size is xxx bytes" },
+  {0}
 };
 
 static error_t parse_opt (int key, char *arg, struct argp_state *state){
