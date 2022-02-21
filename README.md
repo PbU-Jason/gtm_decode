@@ -11,6 +11,7 @@ gcc *.c -o gtm_decoder -O3
 ```
 ## Use
 ```
+Usage: gtm_decoder [OPTION...] use --help flag to see more detail
 GTM decoder -- decode GTM binary file to human readable data
 note: this is a testing version!!
 
@@ -20,6 +21,7 @@ note: this is a testing version!!
   -m, --decode-mode=Num      the decode mode, 0 = decode science data, 1 =
                              decode telemetry data
   -o, --output=FILE          The output file
+  -s, --silent               no log and error message
   -t, --terminal-out         deocder will ignore output file and dump all the
                              results into terminal
   -?, --help                 Give this help list
@@ -27,6 +29,7 @@ note: this is a testing version!!
 
 Mandatory or optional arguments to long options are also mandatory or optional
 for any corresponding short options.
+
 ```
 ## Output file format
 ### Science data

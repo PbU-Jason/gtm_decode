@@ -14,7 +14,7 @@ static struct argp_option options[] = {
   {"decode-mode", 'm', "Num", 0, "the decode mode, 0 = decode science data, 1 = decode telemetry data"},
   {"buffer-size", 'b', "Bytes", OPTION_ARG_OPTIONAL , "The max buffer size while loading the binary file. The defalt size is 1 GB" },
   {"terminal-out", 't', NULL, OPTION_ARG_OPTIONAL , "deocder will ignore output file and dump all the results into terminal" },
-  {"silent",'s', NULL, OPTION_ARG_OPTIONAL ,"no log and error message if set"},
+  {"silent",'s', NULL, OPTION_ARG_OPTIONAL ,"no log and error message"},
   {0}
 };
 
