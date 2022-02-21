@@ -6,9 +6,8 @@
 // the code is designed for little endian computers (like x86_64) !!
 
 int main(int argc, char **argv){
-    log_message("program start");
-
     set_argument(argc, argv);
+    log_message("program start");
 
     check_endianness();
     //create all the global buffer

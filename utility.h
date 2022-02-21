@@ -7,12 +7,13 @@
 extern size_t max_binary_buffer_size;   //in bytes
 extern int decode_mode;
 extern int terminal_out;
+extern int debug_output;
 extern unsigned char* binary_buffer;
 extern FILE* bin_file;
 extern FILE* out_file;
 
-void log_message(char* description);
-void log_error(char* description);
+void log_message(const char* format, ...);
+void log_error(const char* format, ...);
 void check_endianness(void);
 void big2little_endian(unsigned char* target, size_t target_size);
 unsigned char** create_2D_arr(size_t row, size_t col);

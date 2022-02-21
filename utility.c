@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <stdint.h>
 #include "utility.h"
@@ -8,21 +9,32 @@
 size_t max_binary_buffer_size = 1174405120; //1GB
 int decode_mode = 0;
 int terminal_out = 0;
+int debug_output = 1;
 unsigned char* binary_buffer = NULL;
 FILE* bin_file = NULL;
 FILE* out_file = NULL;
 
-void log_message(char* description){
-    printf("Message: ");
-    printf(description);
-    printf("\n");
+void log_message(const char* format, ...){
+    if (debug_output){
+        va_list args;
+        va_start(args, format);
+        printf("Message: ");
+        vprintf(format, args);
+        printf("\n");
+        va_end(args);
+    }
 }
 
-void log_error(char* description){
-    printf("ERROR: ");
-    printf(description);
-    printf("\n");
-    exit(1);
+void log_error(const char* format, ...){
+    if (debug_output){
+        va_list args;
+        va_start(args, format);
+        printf("ERROR: ");
+        vprintf(format, args);
+        printf("\n");
+        va_end(args);
+        exit(1);
+    }
 }
 
 void check_endianness(void){

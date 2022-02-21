@@ -14,6 +14,7 @@ static struct argp_option options[] = {
   {"decode-mode", 'm', "Num", 0, "the decode mode, 0 = decode science data, 1 = decode telemetry data"},
   {"buffer-size", 'b', "Bytes", OPTION_ARG_OPTIONAL , "The max buffer size while loading the binary file. The defalt size is 1 GB" },
   {"terminal-out", 't', NULL, OPTION_ARG_OPTIONAL , "deocder will ignore output file and dump all the results into terminal" },
+  {"silent",'s', NULL, OPTION_ARG_OPTIONAL ,"no log and error message if set"},
   {0}
 };
 
@@ -39,6 +40,9 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state){
       if (! sscanf(arg, "%zu", &max_binary_buffer_size)){
           log_error("can't parse buffer-size");
       }
+      break;
+    case 's':
+      debug_output = 0;
       break;
     default:
       return ARGP_ERR_UNKNOWN;
