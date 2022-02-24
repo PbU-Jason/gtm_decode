@@ -282,13 +282,16 @@ void write_tmtc_buffer(void){
 
 void parse_tmtc_packet(unsigned char* target){
     int i;
+    unsigned char temp[2];
 
     tmtc_buffer->gtm_module = (*(target + 2) == 0x02)? 0 : 1;
     //packet counter
     memcpy(&(tmtc_buffer->packet_counter), target + 3, 2);
     big2little_endian(&(tmtc_buffer->packet_counter), 2);
     //pps_counter
-    memcpy(&(tmtc_buffer->pps_counter), target + 15, 2);
+    memcpy(temp, target + 15, 2);
+    temp[0] = temp[0] & 0x7f;   //mask the GTM id bit
+    memcpy(&(tmtc_buffer->pps_counter), temp, 2);
     big2little_endian(&(tmtc_buffer->pps_counter), 2);
     //fine counter
     memcpy(&(tmtc_buffer->fine_counter), target + 17, 3);
