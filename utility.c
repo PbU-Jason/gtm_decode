@@ -46,13 +46,13 @@ void check_endianness(void){
     }
 }
 
-void big2little_endian(unsigned char* target, size_t target_size){
+void big2little_endian(void* target, size_t target_size){
     unsigned char* buffer = NULL;
     size_t i;
 
     buffer = (unsigned char*) malloc(target_size);
     for (i=0;i<target_size;++i){
-        buffer[i] = target[target_size - 1 - i];
+        buffer[i] = ((unsigned char*) target)[target_size - 1 - i];
     }
     
     memcpy(target, buffer, target_size);

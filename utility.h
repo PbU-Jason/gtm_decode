@@ -15,7 +15,7 @@ extern FILE* out_file;
 void log_message(const char* format, ...);
 void log_error(const char* format, ...);
 void check_endianness(void);
-void big2little_endian(unsigned char* target, size_t target_size);
+void big2little_endian(void* target, size_t target_size);
 unsigned char** create_2D_arr(size_t row, size_t col);
 void destroy_2D_arr(unsigned char** arr, size_t row);
 void left_shift_mem(unsigned char* target_start, size_t target_size, uint8_t bits);
