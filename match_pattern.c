@@ -298,8 +298,6 @@ void parse_tmtc_packet(unsigned char* target){
     left_shift_mem(temp3, 3, 2);
     temp3[2] = temp3[2] >> 2;
     memcpy(&(tmtc_buffer->fine_counter), temp3, 3);
-    log_message("ori bin: %02x%02x%02x", *(target + 17), *(target + 18), *(target + 19));
-    log_error("new bin: %06x", tmtc_buffer->fine_counter);
     //board temp
     memcpy(&(tmtc_buffer->board_temp1), target + 20, 1);
     memcpy(&(tmtc_buffer->board_temp2), target + 21, 1);
