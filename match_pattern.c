@@ -282,18 +282,22 @@ void write_tmtc_buffer(void){
 
 void parse_tmtc_packet(unsigned char* target){
     int i;
-    unsigned char temp[2];
+    unsigned char temp2[2], temp3[3];
 
     tmtc_buffer->gtm_module = (*(target + 2) == 0x02)? 0 : 1;
     //packet counter
     memcpy(&(tmtc_buffer->packet_counter), target + 3, 2);
     //pps_counter
-    memcpy(temp, target + 15, 2);
-    temp[0] = temp[0] & 0x7f;   //mask the GTM id bit
-    memcpy(&(tmtc_buffer->pps_counter), temp, 2);
+    memcpy(temp2, target + 15, 2);
+    left_shift_mem(temp2, 2, 1);
+    temp2[1] = temp2[1] >> 1;
+    memcpy(&(tmtc_buffer->pps_counter), temp2, 2);
     //fine counter
-    memcpy(&(tmtc_buffer->fine_counter), target + 17, 3);
-    tmtc_buffer->fine_counter = tmtc_buffer->fine_counter >> 8;
+    tmtc_buffer->fine_counter = 0x00000000;
+    memcpy(temp3, target + 17, 3);
+    left_shift_mem(temp3, 3, 2);
+    temp3[2] = temp3[2] >> 2;
+    memcpy(&(tmtc_buffer->fine_counter), temp3, 3);
     //board temp
     memcpy(&(tmtc_buffer->board_temp1), target + 20, 1);
     memcpy(&(tmtc_buffer->board_temp2), target + 21, 1);
@@ -303,10 +307,17 @@ void parse_tmtc_packet(unsigned char* target){
     memcpy(&(tmtc_buffer->citiroc2_temp1), target + 24, 1);
     memcpy(&(tmtc_buffer->citiroc2_temp2), target + 25, 1);
     //citiroc livetime
-    memcpy(&(tmtc_buffer->citiroc1_livetime), target + 26, 3);
-    tmtc_buffer->citiroc1_livetime = tmtc_buffer->citiroc1_livetime >> 8;
-    memcpy(&(tmtc_buffer->citiroc2_livetime), target + 29, 3);
-    tmtc_buffer->citiroc2_livetime = tmtc_buffer->citiroc2_livetime >> 8;
+    tmtc_buffer->citiroc1_livetime = 0x00000000;
+    memcpy(temp3, target + 26, 3);
+    left_shift_mem(temp3, 3, 2);
+    temp3[2] = temp3[2] >> 2;
+    memcpy(&(tmtc_buffer->citiroc1_livetime), temp3, 3);
+
+    tmtc_buffer->citiroc2_livetime = 0x00000000;
+    memcpy(temp3, target + 29, 3);
+    left_shift_mem(temp3, 3, 2);
+    temp3[2] = temp3[2] >> 2;
+    memcpy(&(tmtc_buffer->citiroc2_livetime), temp3, 3);
     //citiroc hit
     for (i=0;i<32;++i){
         memcpy(&(tmtc_buffer->citiroc1_hit[i]), target + 32 + i, 1);

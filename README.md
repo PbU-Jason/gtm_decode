@@ -9,6 +9,16 @@ git clone git@github.com:iiiian/gtm_decode.git
 cd gtm_decode
 gcc *.c -o gtm_decoder -O3 
 ```
+### Windows
+first install cygwin 64, tick the devel package during the install (Remember to add C:\cygwin64\bin to your path). Then clone the respository by
+```
+git clone git@github.com:iiiian/gtm_decode.git
+cd gtm_decode
+```
+link `argp` library and compile
+```
+gcc *.c -o gtm_decoder -IC:\cygwin64\usr\include -LC:\cygwin64\usr\lib -largp -O3
+```
 ## Use
 ```
 Usage: gtm_decoder [OPTION...] use --help flag to see more detail
