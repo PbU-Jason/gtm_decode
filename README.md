@@ -57,3 +57,10 @@ gain: 0=LG, 1=HG
 ```
 [gtm module] [Packet Counter] [Lastest PPS Counter] [Lastest Fine Time Counter Value Between 2 PPS] [Board Temperature#1] [Board Temperature#2] [CITIROC1 Temperature#1] [CITIROC1 Temperature#2] [CITIROC2 Temperature#1] [CITIROC2 Temperature#2] [CITIROC1 Live time] [CITIROC2 Live time] [CITIROC1 Hit Counter#0 ] ~ [CITIROC1 Hit Counter#31 ] [CITIROC2 Hit Counter#0 ] ~ [CITIROC2 Hit Counter#31 ] [CITIROC1 Trigger counter] [CITIROC2 Trigger counter] [Counter period Setting] [HV DAC1] [HV DAC2] [SPW#A Error count] [SPW#B Error count] [SPW#A Last Recv Byte] [SPW#A Last Recv Byte] [SPW#A status] [SPW#B status] [Recv Checksum of Last CMD] [Calc Checksum of Last CMD] [Number of Recv CMDs] [SEU-Measurement#1] [SEU-Measurement#2] [SEU-Measurement#3] [checksum]
 ```
+## Todo
+### pipeline format
+
+- parse UTC data
+- adc value to energy
+- GTM ID, citiroc ID, channel ID to detector ID
+- decode ECI(Earth-centered inertial) info from S/C bus

@@ -9,6 +9,7 @@
 unsigned char* sync_data_buffer = NULL;
 unsigned char* tmtc_data_buffer = NULL;
 Time* time_buffer = NULL;
+Position* position_buffer = NULL;
 Event* event_buffer = NULL;
 Tmtc* tmtc_buffer;
 int sync_data_buffer_counter = 0;
@@ -26,6 +27,20 @@ void parse_utc_time(unsigned char* target){
     return;
 }
 
+void parse_position(unsigned char* target){
+    memcpy(&(position_buffer->x), target, 4);
+    memcpy(&(position_buffer->y), target + 4, 4);
+    memcpy(&(position_buffer->z), target + 8, 4);
+    memcpy(&(position_buffer->x_velocity), target + 12, 4);
+    memcpy(&(position_buffer->y_velocity), target + 16, 4);
+    memcpy(&(position_buffer->z_velocity), target + 20, 4);
+    memcpy(&(position_buffer->quaternion1), target + 24, 2);
+    memcpy(&(position_buffer->quaternion2), target + 26, 2);
+    memcpy(&(position_buffer->quaternion3), target + 28, 2);
+    memcpy(&(position_buffer->quaternion4), target + 30, 2);
+}
+
+
 int is_sd_header(unsigned char* target){
     static unsigned char target_copy[SD_HEADER_SIZE];
     static unsigned char ref_master[SD_HEADER_SIZE]={0x88, 0x55, 0xC0, 0x00, 0x04, 0x4f};
@@ -41,7 +56,9 @@ int is_sd_header(unsigned char* target){
 }
 
 static void write_sd_header(uint8_t sequence_count){
-    fprintf(out_file, "sd header: %3u\n", sequence_count);
+    if (export_mode == 0 || export_mode == 2){
+        fprintf(out_file_raw, "sd header: %3u\n", sequence_count);
+    }
 }
 
 void parse_sd_header(unsigned char* target){
@@ -85,7 +102,9 @@ static int is_sync_tail(unsigned char* target){
 }
 
 static void write_sync_data(void){
-    fprintf(out_file, "sync: %5u, %3u\n", event_buffer->pps_counter, event_buffer->cmd_seq_num);
+    if (export_mode == 0 || export_mode == 2){
+        fprintf(out_file_raw, "sync: %5u, %3u\n", event_buffer->pps_counter, event_buffer->cmd_seq_num);
+    }
 }
 
 static void parse_sync_data(unsigned char* target){
@@ -99,12 +118,12 @@ static void parse_sync_data(unsigned char* target){
     buffer[0] = buffer[0] & 0x3F; //mask header and gtm module
     big2little_endian(buffer, 2);
     memcpy(&(event_buffer->pps_counter), buffer, 2);
-
     //CMD-SAD sequence number
     memcpy(&(event_buffer->cmd_seq_num), buffer + 24, 1);
-
     //UTC
     parse_utc_time(target + 4);
+    //ECI stuff
+    parse_position(target + 10);
 
     free(buffer);
     write_sync_data();
@@ -123,12 +142,16 @@ static void print_event_buffer(void){
 }
 
 static void write_event_time(void){
-    fprintf(out_file, "event time: %10u\n", event_buffer->fine_counter);
+    if (export_mode == 0 || export_mode == 2){
+        fprintf(out_file_raw, "event time: %10u\n", event_buffer->fine_counter);
+    }
 }
 
 static void write_event_buffer(void){
-    fprintf(out_file, "event adc: ");
-    fprintf(out_file, "%5u;%10u;%1u;%1u;%3u;%1u;%5u\n", event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id,event_buffer->energy_filter,event_buffer->adc_value);
+    if (export_mode == 0 || export_mode == 2){
+        fprintf(out_file_raw, "event adc: ");
+        fprintf(out_file_raw, "%5u;%10u;%1u;%1u;%3u;%1u;%5u\n", event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id,event_buffer->energy_filter,event_buffer->adc_value);
+    }
 }
 
 static void parse_event_data(unsigned char* target){
@@ -280,14 +303,16 @@ int is_tmtc_tail(unsigned char* targrt){
 void write_tmtc_buffer(void){
     int i;
 
-    fprintf(out_file, "%3u;%5u;%5u;%10u;%3u;%3u;%3u;%3u;%3u;%3u;%10u;%10u", tmtc_buffer->gtm_module,tmtc_buffer->packet_counter,tmtc_buffer->pps_counter,tmtc_buffer->fine_counter,tmtc_buffer->board_temp1,tmtc_buffer->board_temp2,tmtc_buffer->citiroc1_temp1,tmtc_buffer->citiroc1_temp2,tmtc_buffer->citiroc2_temp1,tmtc_buffer->citiroc2_temp2,tmtc_buffer->citiroc1_livetime,tmtc_buffer->citiroc2_livetime);
-    for (i=0;i<32;++i){
-        fprintf(out_file, ";%3u", tmtc_buffer->citiroc1_hit[i]);
+    if (export_mode == 0 || export_mode == 2){
+        fprintf(out_file_raw, "%3u;%5u;%5u;%10u;%3u;%3u;%3u;%3u;%3u;%3u;%10u;%10u", tmtc_buffer->gtm_module,tmtc_buffer->packet_counter,tmtc_buffer->pps_counter,tmtc_buffer->fine_counter,tmtc_buffer->board_temp1,tmtc_buffer->board_temp2,tmtc_buffer->citiroc1_temp1,tmtc_buffer->citiroc1_temp2,tmtc_buffer->citiroc2_temp1,tmtc_buffer->citiroc2_temp2,tmtc_buffer->citiroc1_livetime,tmtc_buffer->citiroc2_livetime);
+        for (i=0;i<32;++i){
+            fprintf(out_file_raw, ";%3u", tmtc_buffer->citiroc1_hit[i]);
+        }
+        for (i=0;i<32;++i){
+            fprintf(out_file_raw, ";%3u", tmtc_buffer->citiroc2_hit[i]);
+        }
+        fprintf(out_file_raw, ";%5u;%5u;%3u;%3u;%3u;%3u;%3u;%3u;%3u;%5u;%5u;%3u;%3u;%3u;%5u;%5u;%5u;%3u\n", tmtc_buffer->citiroc1_trigger, tmtc_buffer->citiroc2_trigger, tmtc_buffer->counter_period, tmtc_buffer->hv_dac1, tmtc_buffer->hv_dac2, tmtc_buffer->spw_a_error_count, tmtc_buffer->spw_b_error_count, tmtc_buffer->spw_a_last_receive, tmtc_buffer->spw_b_last_receive,tmtc_buffer->spw_a_status, tmtc_buffer->spw_b_status, tmtc_buffer->recv_checksum, tmtc_buffer->calc_checksum, tmtc_buffer->recv_checksum, tmtc_buffer->seu1, tmtc_buffer->seu2, tmtc_buffer->seu3, tmtc_buffer->checksum);
     }
-    for (i=0;i<32;++i){
-        fprintf(out_file, ";%3u", tmtc_buffer->citiroc2_hit[i]);
-    }
-    fprintf(out_file, ";%5u;%5u;%3u;%3u;%3u;%3u;%3u;%3u;%3u;%5u;%5u;%3u;%3u;%3u;%5u;%5u;%5u;%3u\n", tmtc_buffer->citiroc1_trigger, tmtc_buffer->citiroc2_trigger, tmtc_buffer->counter_period, tmtc_buffer->hv_dac1, tmtc_buffer->hv_dac2, tmtc_buffer->spw_a_error_count, tmtc_buffer->spw_b_error_count, tmtc_buffer->spw_a_last_receive, tmtc_buffer->spw_b_last_receive,tmtc_buffer->spw_a_status, tmtc_buffer->spw_b_status, tmtc_buffer->recv_checksum, tmtc_buffer->calc_checksum, tmtc_buffer->recv_checksum, tmtc_buffer->seu1, tmtc_buffer->seu2, tmtc_buffer->seu3, tmtc_buffer->checksum);
 }
 
 void parse_tmtc_packet(unsigned char* target){

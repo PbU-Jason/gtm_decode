@@ -22,6 +22,20 @@ typedef struct Time
     float sec;
 } Time;
 
+typedef struct Position
+{
+    uint32_t x;
+    uint32_t y;
+    uint32_t z;
+    uint32_t x_velocity;
+    uint32_t y_velocity;
+    uint32_t z_velocity;
+    uint16_t quaternion1;
+    uint16_t quaternion2;
+    uint16_t quaternion3;
+    uint16_t quaternion4;
+} Position;
+
 typedef struct Event
 {
     Gtm_module gtm_module;
@@ -75,6 +89,7 @@ extern unsigned char* sync_data_buffer;
 extern int tmtc_data_buffer_counter;
 extern unsigned char* tmtc_data_buffer;
 extern Time* time_buffer;
+extern Position* position_buffer;
 extern Event* event_buffer;
 extern Tmtc* tmtc_buffer;
 extern int missing_sync_data;
@@ -82,6 +97,7 @@ extern int got_first_sync_data;
 extern int continuous_packet;
 
 void parse_utc_time(unsigned char* target);
+void parse_position(unsigned char* target);
 int is_sd_header(unsigned char* target);
 void parse_sd_header(unsigned char* target);
 int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size);

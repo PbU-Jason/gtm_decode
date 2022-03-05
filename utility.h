@@ -6,11 +6,13 @@
 
 extern size_t max_binary_buffer_size;   //in bytes
 extern int decode_mode;
+extern int export_mode;
 extern int terminal_out;
 extern int debug_output;
 extern unsigned char* binary_buffer;
 extern FILE* bin_file;
-extern FILE* out_file;
+extern FILE* out_file_raw;
+extern FILE* out_file_pipeline;
 
 void log_message(const char* format, ...);
 void log_error(const char* format, ...);
