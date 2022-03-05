@@ -21,18 +21,17 @@ gcc *.c -o gtm_decoder -IC:\cygwin64\usr\include -LC:\cygwin64\usr\lib -largp -O
 ```
 ## Use
 ```
-Usage: gtm_decoder [OPTION...] use --help flag to see more detail
 GTM decoder -- decode GTM binary file to human readable data
-note: this is a testing version!!
+The pipeline output is not supported yet
 
   -b, --buffer-size=Bytes    The max buffer size while loading the binary file.
                              The defalt size is 1 GB
   -e, --export-mode=Num      the export mode, 0 = output raw format, 1 = output
                              pipeline format, 2 = output both, default 0
-  -i, --input=FILE           The input binary file
-  -m, --decode-mode=Num      the decode mode, 0 = decode science data, 1 =
-                             decode telemetry data
-  -o, --output=FILE          The output filename prefix
+  -i, --input=FILE           Required!!, The input binary file
+  -m, --decode-mode=Num      Required!!, the decode mode, 0 = decode science
+                             data, 1 = decode telemetry data
+  -o, --output=FILE          Required!!, The output filename prefix
   -s, --silent               no log and error message
   -t, --terminal-out         deocder will ignore output file and dump all the
                              results into terminal

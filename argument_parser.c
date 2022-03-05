@@ -5,14 +5,14 @@
 char* input_file_path = NULL;
 char* output_file_path = NULL;
 char doc[] = 
-    "GTM decoder -- decode GTM binary file to human readable data\nnote: this is a testing version!!";
+    "GTM decoder -- decode GTM binary file to human readable data\nThe pipeline output is not supported yet";
 char args_doc[] = "use --help flag to see more detail";
-char version_str[] = "testing 1.0\n";
+char version_str[] = "1.0\n";
 
 static struct argp_option options[] = {
-  {"input", 'i', "FILE", 0, "The input binary file" },
-  {"output", 'o', "FILE", 0, "The output filename prefix" },
-  {"decode-mode", 'm', "Num", 0, "the decode mode, 0 = decode science data, 1 = decode telemetry data"},
+  {"input", 'i', "FILE", 0, "Required!!, The input binary file" },
+  {"output", 'o', "FILE", 0, "Required!!, The output filename prefix" },
+  {"decode-mode", 'm', "Num", 0, "Required!!, the decode mode, 0 = decode science data, 1 = decode telemetry data"},
   {"export-mode", 'e', "Num", 0, "the export mode, 0 = output raw format, 1 = output pipeline format, 2 = output both, default 0"},
   {"buffer-size", 'b', "Bytes", 0, "The max buffer size while loading the binary file. The defalt size is 1 GB" },
   {"terminal-out", 't', NULL, OPTION_ARG_OPTIONAL , "deocder will ignore output file and dump all the results into terminal" },
