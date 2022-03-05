@@ -13,6 +13,15 @@ typedef enum{
     SLAVE
 } Gtm_module;
 
+typedef struct Time
+{
+    uint16_t year;
+    uint16_t day;
+    uint8_t hour;
+    uint8_t minute;
+    float sec;
+} Time;
+
 typedef struct Event
 {
     Gtm_module gtm_module;
@@ -65,12 +74,14 @@ extern int sync_data_buffer_counter;
 extern unsigned char* sync_data_buffer;
 extern int tmtc_data_buffer_counter;
 extern unsigned char* tmtc_data_buffer;
+extern Time* time_buffer;
 extern Event* event_buffer;
 extern Tmtc* tmtc_buffer;
 extern int missing_sync_data;
 extern int got_first_sync_data;
 extern int continuous_packet;
 
+void parse_utc_time(unsigned char* target);
 int is_sd_header(unsigned char* target);
 void parse_sd_header(unsigned char* target);
 int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size);

@@ -107,6 +107,11 @@ void create_all_buffer(void){
         log_error("fail to create tmtc data buffer");
     }
 
+    time_buffer = (Time*) malloc(sizeof(Time));
+    if (! time_buffer){
+        log_error("faile to create time buffer");
+    }
+
     event_buffer = (Event*) malloc(sizeof(Event));
     if (! event_buffer){
         log_error("fail to create event buffer");
@@ -122,6 +127,7 @@ void destroy_all_buffer(void){
     free(binary_buffer);
     free(sync_data_buffer);
     free(tmtc_data_buffer);
+    free(time_buffer);
     free(event_buffer);
     free(tmtc_buffer);
 }

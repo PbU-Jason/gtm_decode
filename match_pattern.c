@@ -8,6 +8,7 @@
 //global variables
 unsigned char* sync_data_buffer = NULL;
 unsigned char* tmtc_data_buffer = NULL;
+Time* time_buffer = NULL;
 Event* event_buffer = NULL;
 Tmtc* tmtc_buffer;
 int sync_data_buffer_counter = 0;
@@ -18,6 +19,12 @@ int continuous_packet = 1;
 
 //others
 uint8_t sequence_count = 0;
+
+
+//should be wrote later when the format is clear, it's a place holder now
+void parse_utc_time(unsigned char* target){
+    return;
+}
 
 int is_sd_header(unsigned char* target){
     static unsigned char target_copy[SD_HEADER_SIZE];
@@ -95,6 +102,9 @@ static void parse_sync_data(unsigned char* target){
 
     //CMD-SAD sequence number
     memcpy(&(event_buffer->cmd_seq_num), buffer + 24, 1);
+
+    //UTC
+    parse_utc_time(target + 4);
 
     free(buffer);
     write_sync_data();
@@ -287,6 +297,8 @@ void parse_tmtc_packet(unsigned char* target){
     tmtc_buffer->gtm_module = (*(target + 2) == 0x02)? 0 : 1;
     //packet counter
     memcpy(&(tmtc_buffer->packet_counter), target + 3, 2);
+    //UTC
+    parse_utc_time(target + 7);
     //pps_counter
     memcpy(temp2, target + 15, 2);
     left_shift_mem(temp2, 2, 1);
