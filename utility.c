@@ -118,6 +118,11 @@ void create_all_buffer(void){
         log_error("faile to create time buffer");
     }
 
+    time_start = (Time*) malloc(sizeof(Time));
+    if (! time_start){
+        log_error("fail to create time start buffer");
+    }
+
     position_buffer = (Position*) malloc(sizeof(Position));
     if (! position_buffer){
         log_error("faile to create position buffer");
@@ -139,6 +144,7 @@ void destroy_all_buffer(void){
     free(sync_data_buffer);
     free(tmtc_data_buffer);
     free(time_buffer);
+    free(time_start);
     free(position_buffer);
     free(event_buffer);
     free(tmtc_buffer);
@@ -222,3 +228,12 @@ void close_all_file(void){
     log_message("close all file");
 }
 
+double find_time_delta(Time* time_start, Time* time_end){
+    double del_sec = 0;
+    del_sec = del_sec + (time_end->year - time_start->year) * 31536000;
+    del_sec = del_sec + (time_end->day - time_start->day) * 86400;
+    del_sec = del_sec + (time_end->hour - time_start->hour) * 3600;
+    del_sec = del_sec + (time_end->minute - time_start->minute) * 60;
+    del_sec = del_sec + (time_end->sec - time_start->sec);
+    return del_sec;
+}

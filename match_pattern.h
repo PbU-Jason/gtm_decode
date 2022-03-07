@@ -8,6 +8,9 @@
 #define INI_PPS_COUNTER 0
 #define INI_FINE_COUNTER 0
 
+#include <stdint.h>
+#include <stdlib.h>
+
 typedef enum{
     MASTER,
     SLAVE
@@ -19,7 +22,7 @@ typedef struct Time
     uint16_t day;
     uint8_t hour;
     uint8_t minute;
-    float sec;
+    double sec;
 } Time;
 
 typedef struct Position
@@ -46,6 +49,7 @@ typedef struct Event
     uint8_t channel_id;
     uint8_t energy_filter;
     uint16_t adc_value;
+    double energy;
 } Event;
 
 typedef struct Tmtc
@@ -89,6 +93,7 @@ extern unsigned char* sync_data_buffer;
 extern int tmtc_data_buffer_counter;
 extern unsigned char* tmtc_data_buffer;
 extern Time* time_buffer;
+extern Time* time_start;
 extern Position* position_buffer;
 extern Event* event_buffer;
 extern Tmtc* tmtc_buffer;

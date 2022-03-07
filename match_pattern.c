@@ -3,12 +3,13 @@
 #include <stdio.h>
 #include "utility.h"
 #include "match_pattern.h"
-
+#include "energy_calibration.h"
 
 //global variables
 unsigned char* sync_data_buffer = NULL;
 unsigned char* tmtc_data_buffer = NULL;
 Time* time_buffer = NULL;
+Time* time_start = NULL;
 Position* position_buffer = NULL;
 Event* event_buffer = NULL;
 Tmtc* tmtc_buffer;
@@ -20,10 +21,17 @@ int continuous_packet = 1;
 
 //others
 uint8_t sequence_count = 0;
+int got_first_time_info = 0;
 
 
 //should be wrote later when the format is clear, it's a place holder now
 void parse_utc_time(unsigned char* target){
+    //set all to 0 for now
+    time_buffer->year = 0;
+    time_buffer->day = 0;
+    time_buffer->hour = 0;
+    time_buffer->minute = 0;
+    time_buffer->sec = 0;
     return;
 }
 
@@ -105,6 +113,15 @@ static void write_sync_data(void){
     if (export_mode == 0 || export_mode == 2){
         fprintf(out_file_raw, "sync: %5u, %3u\n", event_buffer->pps_counter, event_buffer->cmd_seq_num);
     }
+
+    if (export_mode == 1 || export_mode == 2){
+        if (! got_first_time_info){
+            fprintf(out_file_pipeline, "Start time:%5i;%5i;%3i;%3i;%f\n", time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
+            fprintf(out_file_pipeline, "time;detector;energy;qw;qx;qy;qz;ECIx;ECIy;ECIz\n");    //header
+            memcpy(time_start, time_buffer, sizeof(Time));
+            got_first_time_info = 1;
+        }
+    }
 }
 
 static void parse_sync_data(unsigned char* target){
@@ -124,6 +141,9 @@ static void parse_sync_data(unsigned char* target){
     parse_utc_time(target + 4);
     //ECI stuff
     parse_position(target + 10);
+
+    //reset fine counter
+    event_buffer->fine_counter = 0;
 
     free(buffer);
     write_sync_data();
@@ -152,12 +172,16 @@ static void write_event_buffer(void){
         fprintf(out_file_raw, "event adc: ");
         fprintf(out_file_raw, "%5u;%10u;%1u;%1u;%3u;%1u;%5u\n", event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id,event_buffer->energy_filter,event_buffer->adc_value);
     }
+    if (export_mode == 1 || export_mode == 2){
+        fprintf(out_file_pipeline, "%f;0;%f;%5i;%5i;%5i;%5i;%10i;%10i;%10i\n", find_time_delta(time_start, time_buffer), event_buffer->energy, position_buffer->quaternion1, position_buffer->quaternion2, position_buffer->quaternion3, position_buffer->quaternion4, position_buffer->x, position_buffer->y, position_buffer->z);
+    }
 }
 
 static void parse_event_data(unsigned char* target){
     static unsigned char ref_event_time = 0x80;
     static unsigned char ref_event_adc = 0x40;
     unsigned char* buffer = NULL;
+    uint32_t old_fine_counter;
 
     if ((*target & 0xC0) == ref_event_time){    //event time data
         buffer = (unsigned char*) malloc(4);
@@ -167,8 +191,20 @@ static void parse_event_data(unsigned char* target){
         memcpy(&buffer[1], target, 3);
         buffer[1] = buffer[1] & 0x3F;   //mask the header
         big2little_endian(buffer, 4);
+        old_fine_counter = event_buffer->fine_counter;
         memcpy(&(event_buffer->fine_counter), buffer, 4);
         free(buffer);
+        //update time buffer
+        //fine counter has reset
+        if (event_buffer->fine_counter < old_fine_counter){
+            time_buffer->sec = time_buffer->sec + (event_buffer->fine_counter + (4194303 - old_fine_counter)) * 0.24 * 0.000001;
+        }
+        else{
+            //log_message("old fine counter: %i, new: %i\n", old_fine_counter, event_buffer->fine_counter);
+            //log_message("del sec from fine counter: %f\n", (event_buffer->fine_counter - old_fine_counter) * 0.24 * 0.000001);
+            time_buffer->sec = time_buffer->sec + (event_buffer->fine_counter - old_fine_counter) * 0.24 * 0.000001;
+        }
+
         write_event_time();
         //log_message("update event time");
         return;
@@ -193,29 +229,12 @@ static void parse_event_data(unsigned char* target){
         buffer[0] = buffer[0] & 0x3F; //mask channel id and energy filter
         big2little_endian(buffer, 2);
         memcpy(&(event_buffer->adc_value), buffer, 2);
+        update_energy_from_adc();
         free(buffer);
 
         write_event_buffer();
         return;
     }
-}
-
-void unit_test(unsigned char* target){
-    check_endianness();
-    create_all_buffer();
-
-    event_buffer->gtm_module = 0;
-    event_buffer->pps_counter = 0;
-    event_buffer->fine_counter = 0;
-    event_buffer->citiroc_id = 0;
-    event_buffer->channel_id = 0;
-    event_buffer->energy_filter = 0;
-    event_buffer->adc_value = 0;
-
-    parse_sync_data(target);
-    print_event_buffer();
-
-    destroy_all_buffer();
 }
 
 int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size){

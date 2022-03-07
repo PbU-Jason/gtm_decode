@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "match_pattern.h"
 
 extern size_t max_binary_buffer_size;   //in bytes
 extern int decode_mode;
@@ -26,4 +27,5 @@ void destroy_all_buffer(void);
 void print_buffer_around(unsigned char* target, int back, int forward);
 void open_all_file(char* input_file_path, char* out_file_path);
 void close_all_file(void);
+double find_time_delta(Time* start, Time* end);
 #endif
