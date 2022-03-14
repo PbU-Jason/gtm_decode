@@ -28,8 +28,8 @@ int main(int argc, char **argv){
         break;
     }
 
-    destroy_all_buffer();
     close_all_file();
+    destroy_all_buffer();
     
     log_message("progarm finished");
     return 0;

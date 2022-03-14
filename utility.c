@@ -15,6 +15,7 @@ unsigned char* binary_buffer = NULL;
 FILE* bin_file = NULL;
 FILE* out_file_raw = NULL;
 FILE* out_file_pipeline = NULL;
+FILE* out_file_pipeline_pos = NULL;
 
 //local variable
 char tmtc_raw_header[] = "gtm module;Packet Counter;Lastest PPS Counter;Lastest Fine Time Counter Value Between 2 PPS;Board Temperature#1;Board Temperature#2;CITIROC1 Temperature#1;CITIROC1 Temperature#2;CITIROC2 Temperature#1;CITIROC2 Temperature#2;CITIROC1 Live time;CITIROC2 Live time;CITIROC1 Hit Counter#0;CITIROC1 Hit Counter#1;CITIROC1 Hit Counter#2;CITIROC1 Hit Counter#3;CITIROC1 Hit Counter#4;CITIROC1 Hit Counter#5;CITIROC1 Hit Counter#6;CITIROC1 Hit Counter#7;CITIROC1 Hit Counter#8;CITIROC1 Hit Counter#9;CITIROC1 Hit Counter#10;CITIROC1 Hit Counter#11;CITIROC1 Hit Counter#12;CITIROC1 Hit Counter#13;CITIROC1 Hit Counter#14;CITIROC1 Hit Counter#15;CITIROC1 Hit Counter#16;CITIROC1 Hit Counter#17;CITIROC1 Hit Counter#18;CITIROC1 Hit Counter#19;CITIROC1 Hit Counter#20;CITIROC1 Hit Counter#21;CITIROC1 Hit Counter#22;CITIROC1 Hit Counter#23;CITIROC1 Hit Counter#24;CITIROC1 Hit Counter#25;CITIROC1 Hit Counter#26;CITIROC1 Hit Counter#27;CITIROC1 Hit Counter#28;CITIROC1 Hit Counter#29;CITIROC1 Hit Counter#30;CITIROC1 Hit Counter#31;CITIROC2 Hit Counter#0;CITIROC2 Hit Counter#1;CITIROC2 Hit Counter#2;CITIROC2 Hit Counter#3;CITIROC2 Hit Counter#4;CITIROC2 Hit Counter#5;CITIROC2 Hit Counter#6;CITIROC2 Hit Counter#7;CITIROC2 Hit Counter#8;CITIROC2 Hit Counter#9;CITIROC2 Hit Counter#10;CITIROC2 Hit Counter#11;CITIROC2 Hit Counter#12;CITIROC2 Hit Counter#13;CITIROC2 Hit Counter#14;CITIROC2 Hit Counter#15;CITIROC2 Hit Counter#16;CITIROC2 Hit Counter#17;CITIROC2 Hit Counter#18;CITIROC2 Hit Counter#19;CITIROC2 Hit Counter#20;CITIROC2 Hit Counter#21;CITIROC2 Hit Counter#22;CITIROC2 Hit Counter#23;CITIROC2 Hit Counter#24;CITIROC2 Hit Counter#25;CITIROC2 Hit Counter#26;CITIROC2 Hit Counter#27;CITIROC2 Hit Counter#28;CITIROC2 Hit Counter#29;CITIROC2 Hit Counter#30;CITIROC2 Hit Counter#31;CITIROC1 Trigger counter;CITIROC2 Trigger counter;Counter period Setting;HV DAC1;HV DAC2;SPW#A Error count;SPW#B Error count;SPW#A Last Recv Byte;SPW#A Last Recv Byte;SPW#A status;SPW#B status;Recv Checksum of Last CMD;Calc Checksum of Last CMD;Number of Recv CMDs;SEU-Measurement#1;SEU-Measurement#2;SEU-Measurement#3;checksum\n";
@@ -128,6 +129,11 @@ void create_all_buffer(void){
         log_error("faile to create position buffer");
     }
 
+    pre_position = (Position*) malloc(sizeof(Position));
+    if (! pre_position){
+        log_error("fail to create pre position buffer");
+    }
+
     event_buffer = (Event*) malloc(sizeof(Event));
     if (! event_buffer){
         log_error("fail to create event buffer");
@@ -146,6 +152,7 @@ void destroy_all_buffer(void){
     free(time_buffer);
     free(time_start);
     free(position_buffer);
+    free(pre_position);
     free(event_buffer);
     free(tmtc_buffer);
 }
@@ -160,14 +167,30 @@ void print_buffer_around(unsigned char* target, int back, int forward){
 }
 
 void open_all_file(char* input_file_path, char* out_file_path){
-    size_t size_prefix, size_postfix_raw, size_postfix_pipeline;
+    size_t size_prefix, size_postfix_raw, size_postfix_pipeline, size_postfix_pipeline_pos;
     char raw_postfix[] = "_raw.txt";
     char pipeline_postfix[] = "_pipeline.txt";
-    char *raw_outpath = NULL, *pipeline_outpath = NULL;
+    char pipeline_pos_postfix[] = "_pipeline_position.txt";
+    char *raw_outpath = NULL, *pipeline_outpath = NULL, *pipeline_pos_outpath = NULL;
     
     size_prefix = sizeof(out_file_path);
     size_postfix_raw = sizeof(raw_postfix);
     size_postfix_pipeline = sizeof(pipeline_postfix);
+    size_postfix_pipeline_pos = sizeof(pipeline_pos_postfix);
+
+    //figure out full output file path
+    raw_outpath = (char*) malloc(size_prefix + size_postfix_raw);
+    if (! raw_outpath){log_error("fail to create raw_outpath in open_all_file()");}
+    memcpy(raw_outpath, out_file_path, size_prefix);
+    strcat(raw_outpath, raw_postfix);
+    pipeline_outpath = (char*) malloc(size_prefix + size_postfix_pipeline);
+    if (! pipeline_outpath){log_error("fail to create pipeline_outpath in open_all_file()");}
+    memcpy(pipeline_outpath, out_file_path, size_prefix);
+    strcat(pipeline_outpath, pipeline_postfix);
+    pipeline_pos_outpath = (char*) malloc(size_prefix + size_postfix_pipeline_pos);
+    if (! pipeline_pos_outpath){log_error("fail to create pipeline_pos_outpath in open_all_file()");}
+    memcpy(pipeline_pos_outpath, out_file_path, size_prefix);
+    strcat(pipeline_pos_outpath, pipeline_pos_postfix);
 
     bin_file = fopen(input_file_path, "rb");
     if (! bin_file){log_error("binary file not found");}
@@ -178,16 +201,6 @@ void open_all_file(char* input_file_path, char* out_file_path){
         out_file_pipeline = stdout;
     }
     else{
-        //figure out full output file path
-        raw_outpath = (char*) malloc(size_prefix + size_postfix_raw);
-        if (! raw_outpath){log_error("fail to create raw_outpath in open_all_file()");}
-        memcpy(raw_outpath, out_file_path, size_prefix);
-        strcat(raw_outpath, raw_postfix);
-        pipeline_outpath = (char*) malloc(size_prefix + size_postfix_pipeline);
-        if (! raw_outpath){log_error("fail to create pipeline_outpath in open_all_file()");}
-        memcpy(pipeline_outpath, out_file_path, size_prefix);
-        strcat(pipeline_outpath, pipeline_postfix);
-
         if (export_mode != 0 && export_mode != 1 && export_mode != 2){
             log_error("unknown export mode");
         }
@@ -202,9 +215,18 @@ void open_all_file(char* input_file_path, char* out_file_path){
         if (export_mode == 1 || export_mode == 2){
             out_file_pipeline = fopen(pipeline_outpath, "w");
             if (! out_file_pipeline){log_error("can't open pipeline output file");}
+
+            if (decode_mode == 0){
+                out_file_pipeline_pos = fopen(pipeline_pos_outpath, "w");
+                if (! out_file_pipeline_pos){log_error("can't open pipeline position out file");}
+            }
         }
         log_message("finish opening output file");
     }
+
+    free(raw_outpath);
+    free(pipeline_outpath);
+    free(pipeline_pos_outpath);
 }
 
 void close_all_file(void){
@@ -220,6 +242,7 @@ void close_all_file(void){
     case 2:
         fclose(out_file_raw);
         fclose(out_file_pipeline);
+        if (decode_mode == 0){fclose(out_file_pipeline_pos);}
         break;
     default:
         log_error("unknown export mode");

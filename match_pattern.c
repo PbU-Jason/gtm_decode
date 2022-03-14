@@ -11,6 +11,7 @@ unsigned char* tmtc_data_buffer = NULL;
 Time* time_buffer = NULL;
 Time* time_start = NULL;
 Position* position_buffer = NULL;
+Position* pre_position = NULL;
 Event* event_buffer = NULL;
 Tmtc* tmtc_buffer;
 int sync_data_buffer_counter = 0;
@@ -117,9 +118,16 @@ static void write_sync_data(void){
     if (export_mode == 1 || export_mode == 2){
         if (! got_first_time_info){
             fprintf(out_file_pipeline, "Start time:%5i;%5i;%3i;%3i;%f\n", time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
-            fprintf(out_file_pipeline, "time;detector;energy;qw;qx;qy;qz;ECIx;ECIy;ECIz\n");    //header
+            fprintf(out_file_pipeline_pos, "Start time:%5i;%5i;%3i;%3i;%f\n", time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
+            fprintf(out_file_pipeline, "time;detector;pixel;energy\n");    //header
+            fprintf(out_file_pipeline_pos, "time;qw;qx;qy;qz;ECIx;ECIy;ECIz\n");    //header
             memcpy(time_start, time_buffer, sizeof(Time));
             got_first_time_info = 1;
+        }
+        //if there is new position info, write and update pre_position
+        if (memcmp(pre_position, position_buffer, sizeof(Position)) != 0){
+            fprintf(out_file_pipeline_pos, "%f;%5i;%5i;%5i;%5i;%10i;%10i;%10i\n", find_time_delta(time_start, time_buffer), position_buffer->quaternion1, position_buffer->quaternion2, position_buffer->quaternion3, position_buffer->quaternion4, position_buffer->x, position_buffer->y, position_buffer->z);
+            memcpy(pre_position, position_buffer, sizeof(Position));
         }
     }
 }
@@ -139,7 +147,7 @@ static void parse_sync_data(unsigned char* target){
     memcpy(&(event_buffer->cmd_seq_num), buffer + 24, 1);
     //UTC
     parse_utc_time(target + 4);
-    //ECI stuff
+    //ECI position stuff
     parse_position(target + 10);
 
     //reset fine counter
@@ -173,7 +181,7 @@ static void write_event_buffer(void){
         fprintf(out_file_raw, "%5u;%10u;%1u;%1u;%3u;%1u;%5u\n", event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id,event_buffer->energy_filter,event_buffer->adc_value);
     }
     if (export_mode == 1 || export_mode == 2){
-        fprintf(out_file_pipeline, "%f;0;%f;%5i;%5i;%5i;%5i;%10i;%10i;%10i\n", find_time_delta(time_start, time_buffer), event_buffer->energy, position_buffer->quaternion1, position_buffer->quaternion2, position_buffer->quaternion3, position_buffer->quaternion4, position_buffer->x, position_buffer->y, position_buffer->z);
+        fprintf(out_file_pipeline, "%f;0;0;%f\n", find_time_delta(time_start, time_buffer), event_buffer->energy);
     }
 }
 
@@ -332,6 +340,17 @@ void write_tmtc_buffer(void){
         }
         fprintf(out_file_raw, ";%5u;%5u;%3u;%3u;%3u;%3u;%3u;%3u;%3u;%5u;%5u;%3u;%3u;%3u;%5u;%5u;%5u;%3u\n", tmtc_buffer->citiroc1_trigger, tmtc_buffer->citiroc2_trigger, tmtc_buffer->counter_period, tmtc_buffer->hv_dac1, tmtc_buffer->hv_dac2, tmtc_buffer->spw_a_error_count, tmtc_buffer->spw_b_error_count, tmtc_buffer->spw_a_last_receive, tmtc_buffer->spw_b_last_receive,tmtc_buffer->spw_a_status, tmtc_buffer->spw_b_status, tmtc_buffer->recv_checksum, tmtc_buffer->calc_checksum, tmtc_buffer->recv_checksum, tmtc_buffer->seu1, tmtc_buffer->seu2, tmtc_buffer->seu3, tmtc_buffer->checksum);
     }
+    /*
+    if (export_mode == 1 || export_mode == 2){
+        if (! got_first_time_info){
+            fprintf(out_file_pipeline, "Start time:%5i;%5i;%3i;%3i;%f\n", time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
+            fprintf(out_file_pipeline, "time;qw;qx;qy;qz;ECIx;ECIy;ECIz\n"); //header
+            memcpy(time_start, time_buffer, sizeof(Time));
+            got_first_time_info = 1;
+        }   
+        fprintf(out_file_pipeline, "%f;%5i;%5i;%5i;%5i;%10i;%10i;%10i\n", find_time_delta(time_start, time_buffer), position_buffer->quaternion1, position_buffer->quaternion2, position_buffer->quaternion3, position_buffer->quaternion4, position_buffer->x, position_buffer->y, position_buffer->z);
+    }
+    */
 }
 
 void parse_tmtc_packet(unsigned char* target){

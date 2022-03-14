@@ -95,6 +95,7 @@ extern unsigned char* tmtc_data_buffer;
 extern Time* time_buffer;
 extern Time* time_start;
 extern Position* position_buffer;
+extern Position* pre_position;
 extern Event* event_buffer;
 extern Tmtc* tmtc_buffer;
 extern int missing_sync_data;

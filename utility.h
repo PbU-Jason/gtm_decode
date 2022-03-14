@@ -14,6 +14,7 @@ extern unsigned char* binary_buffer;
 extern FILE* bin_file;
 extern FILE* out_file_raw;
 extern FILE* out_file_pipeline;
+extern FILE* out_file_pipeline_pos; //for decoding science data + pipeline output, use to record position data
 
 void log_message(const char* format, ...);
 void log_error(const char* format, ...);
