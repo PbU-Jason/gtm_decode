@@ -18,6 +18,14 @@ void parse_science_data(void){
     event_buffer->fine_counter = INI_FINE_COUNTER;
 
     actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+    //find first sd header
+    sd_header_location = find_next_sd_header(binary_buffer, -SD_HEADER_SIZE, actual_binary_buffer_size);
+    if (sd_header_location != 0){
+        log_message("Binary file doesn't start with science data header, first science data header is at byte %zu", sd_header_location);
+        fseek(bin_file, sd_header_location - actual_binary_buffer_size, SEEK_CUR);
+        actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+    }
+
     //loop through buffer
     while(1){
         log_message("load new chunk");
@@ -66,12 +74,12 @@ void parse_science_data(void){
             else{
                 //packet smaller than expected
                 if (sd_header_location - old_sd_header_location < SCIENCE_DATA_SIZE + SD_HEADER_SIZE){
-                    log_message("packet size smaller than expected");
+                    log_message("packet size %zu bytes smaller than expected", sd_header_location - old_sd_header_location);
                     parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, sd_header_location);
                 }
                 //if packet larger than expected, don't parse the packet
                 else{
-                    log_message("packet size larger than expected");
+                    log_message("packet size %zu bytes larger than expected", sd_header_location - old_sd_header_location);
                 }
                 continuous_packet = 0;
                 broken++;
