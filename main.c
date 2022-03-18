@@ -31,6 +31,6 @@ int main(int argc, char **argv){
     close_all_file();
     destroy_all_buffer();
     
-    log_message("progarm finished");
+    log_message("program finished");
     return 0;
 }
