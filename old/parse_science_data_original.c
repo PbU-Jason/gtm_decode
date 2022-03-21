@@ -67,7 +67,7 @@ void parse_science_data(void){
             }
 
             parse_sd_header(binary_buffer + sd_header_location);
-            if (sd_header_location - old_sd_header_location >= SCIENCE_DATA_SIZE + SD_HEADER_SIZE){ // full packet
+            if (sd_header_location - old_sd_header_location == SCIENCE_DATA_SIZE + SD_HEADER_SIZE){ // full packet
                 parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, SCIENCE_DATA_SIZE);
                 full++;
             }
@@ -76,6 +76,10 @@ void parse_science_data(void){
                 if (sd_header_location - old_sd_header_location < SCIENCE_DATA_SIZE + SD_HEADER_SIZE){
                     log_message("packet size %zu bytes smaller than expected", sd_header_location - old_sd_header_location);
                     parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, sd_header_location);
+                }
+                //if packet larger than expected, don't parse the packet
+                else{
+                    log_message("packet size %zu bytes larger than expected", sd_header_location - old_sd_header_location);
                 }
                 continuous_packet = 0;
                 broken++;

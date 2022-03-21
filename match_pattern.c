@@ -49,7 +49,19 @@ void parse_position(unsigned char* target){
     memcpy(&(position_buffer->quaternion4), target + 30, 2);
 }
 
+//since sd header's head has some prob in current test data, reduce some matching pattern
+int is_sd_header(unsigned char* target){
+    static unsigned char target_copy[SD_HEADER_SIZE];
+    static unsigned char ref[2] = {0x88, 0x55};
 
+    //mask the sequence count byte
+    memcpy(target_copy, target, SD_HEADER_SIZE);
+    target_copy[3] = 0x00;
+
+    if (! memcmp(target_copy, ref, 2)){return 1;}
+    return 0;
+}
+/*
 int is_sd_header(unsigned char* target){
     static unsigned char target_copy[SD_HEADER_SIZE];
     static unsigned char ref_master[SD_HEADER_SIZE]={0x88, 0x55, 0xC0, 0x00, 0x04, 0x4f};
@@ -63,6 +75,7 @@ int is_sd_header(unsigned char* target){
     if (! memcmp(target_copy, ref_slave, SD_HEADER_SIZE)){return 1;}
     return 0;
 }
+*/
 
 static void write_sd_header(uint8_t sequence_count){
     if (export_mode == 0 || export_mode == 2){

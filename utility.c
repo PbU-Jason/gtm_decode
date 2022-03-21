@@ -172,7 +172,7 @@ void open_all_file(char* input_file_path, char* out_file_path){
     char pipeline_postfix[] = "_pipeline.txt";
     char pipeline_pos_postfix[] = "_pipeline_position.txt";
     char *raw_outpath = NULL, *pipeline_outpath = NULL, *pipeline_pos_outpath = NULL;
-    
+
     size_prefix = sizeof(out_file_path);
     size_postfix_raw = sizeof(raw_postfix);
     size_postfix_pipeline = sizeof(pipeline_postfix);
