@@ -24,6 +24,27 @@ int continuous_packet = 1;
 uint8_t sequence_count = 0;
 int got_first_time_info = 0;
 
+void parse_utc_time_tmtc(unsigned char *target)
+{
+    uint8_t sub_sec;
+
+    // year
+    memcpy(&(time_buffer->year), target, 2);
+    // day
+    memcpy(&(time_buffer->day), target + 2, 2);
+    // hour
+    memcpy(&(time_buffer->hour), target + 4, 1);
+    // minute
+    memcpy(&(time_buffer->minute), target + 5, 1);
+    // sec
+    memcpy(&(time_buffer->sec), target + 6, 1);
+    // sub sec (ms)
+    memcpy(&sub_sec, target + 7, 1);
+    time_buffer->sec += sub_sec * 0.001;
+
+    return;
+}
+
 // should be wrote later when the format is clear, it's a place holder now
 void parse_utc_time(unsigned char *target)
 {
@@ -441,7 +462,7 @@ void parse_tmtc_packet(unsigned char *target)
     memcpy(&(tmtc_buffer->packet_counter), target + 3, 2);
     big2little_endian(&(tmtc_buffer->packet_counter), 2);
     // UTC
-    parse_utc_time(target + 7);
+    parse_utc_time_tmtc(target + 7);
     // pps_counter
     *(target + 15) = *(target + 15) & 0x7F; // mask GTM module bit
     memcpy(&(tmtc_buffer->pps_counter), target + 15, 2);
