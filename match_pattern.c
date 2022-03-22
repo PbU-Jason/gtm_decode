@@ -26,21 +26,24 @@ int got_first_time_info = 0;
 
 void parse_utc_time_tmtc(unsigned char *target)
 {
-    uint8_t sub_sec;
+    uint8_t sec, sub_sec;
 
     // year
     memcpy(&(time_buffer->year), target, 2);
+    big2little_endian(&(time_buffer->year), 2);
     // day
     memcpy(&(time_buffer->day), target + 2, 2);
+    big2little_endian(&(time_buffer->day), 2);
     // hour
     memcpy(&(time_buffer->hour), target + 4, 1);
     // minute
     memcpy(&(time_buffer->minute), target + 5, 1);
     // sec
-    memcpy(&(time_buffer->sec), target + 6, 1);
+    memcpy(&sec, target + 6, 1);
     // sub sec (ms)
     memcpy(&sub_sec, target + 7, 1);
-    time_buffer->sec += sub_sec * 0.001;
+    //merge sec and sun sec
+    time_buffer->sec = (float) sec + ((float) sub_sec)*0.001;
 
     return;
 }
