@@ -373,19 +373,16 @@ void parse_tmtc_packet(unsigned char* target){
     tmtc_buffer->gtm_module = (*(target + 2) == 0x02)? 0 : 1;
     //packet counter
     memcpy(&(tmtc_buffer->packet_counter), target + 3, 2);
+    big2little_endian(&(tmtc_buffer->packet_counter), 2);
     //UTC
     parse_utc_time(target + 7);
     //pps_counter
-    memcpy(temp2, target + 15, 2);
-    left_shift_mem(temp2, 2, 1);
-    temp2[1] = temp2[1] >> 1;
-    memcpy(&(tmtc_buffer->pps_counter), temp2, 2);
+    *(target + 15) = *(target + 15) & 0x7F; //mask GTM module bit
+    memcpy(&(tmtc_buffer->pps_counter), target + 15, 2);
+    big2little_endian(&(tmtc_buffer->pps_counter), 2);
     //fine counter
-    tmtc_buffer->fine_counter = 0x00000000;
-    memcpy(temp3, target + 17, 3);
-    left_shift_mem(temp3, 3, 2);
-    temp3[2] = temp3[2] >> 2;
-    memcpy(&(tmtc_buffer->fine_counter), temp3, 3);
+    memcpy(&(tmtc_buffer->fine_counter), target + 17, 3);
+    big2little_endian(&(tmtc_buffer->fine_counter), 3);
     //board temp
     memcpy(&(tmtc_buffer->board_temp1), target + 20, 1);
     memcpy(&(tmtc_buffer->board_temp2), target + 21, 1);
@@ -395,17 +392,10 @@ void parse_tmtc_packet(unsigned char* target){
     memcpy(&(tmtc_buffer->citiroc2_temp1), target + 24, 1);
     memcpy(&(tmtc_buffer->citiroc2_temp2), target + 25, 1);
     //citiroc livetime
-    tmtc_buffer->citiroc1_livetime = 0x00000000;
-    memcpy(temp3, target + 26, 3);
-    left_shift_mem(temp3, 3, 2);
-    temp3[2] = temp3[2] >> 2;
-    memcpy(&(tmtc_buffer->citiroc1_livetime), temp3, 3);
-
-    tmtc_buffer->citiroc2_livetime = 0x00000000;
-    memcpy(temp3, target + 29, 3);
-    left_shift_mem(temp3, 3, 2);
-    temp3[2] = temp3[2] >> 2;
-    memcpy(&(tmtc_buffer->citiroc2_livetime), temp3, 3);
+    memcpy(&(tmtc_buffer->citiroc1_livetime), target + 26, 3);
+    big2little_endian(&(tmtc_buffer->citiroc1_livetime), 3);
+    memcpy(&(tmtc_buffer->citiroc2_livetime), target + 29, 3);
+    big2little_endian(&(tmtc_buffer->citiroc2_livetime), 3);
     //citiroc hit
     for (i=0;i<32;++i){
         memcpy(&(tmtc_buffer->citiroc1_hit[i]), target + 32 + i, 1);
@@ -413,7 +403,9 @@ void parse_tmtc_packet(unsigned char* target){
     }
     //citiroc trigger
     memcpy(&(tmtc_buffer->citiroc1_trigger), target + 96, 2);
+    big2little_endian(&(tmtc_buffer->citiroc1_trigger), 2);
     memcpy(&(tmtc_buffer->citiroc2_trigger), target + 98, 2);
+    big2little_endian(&(tmtc_buffer->citiroc2_trigger), 2);
     //counter period
     memcpy(&(tmtc_buffer->counter_period), target + 100, 1);
     //hv dac
@@ -433,8 +425,11 @@ void parse_tmtc_packet(unsigned char* target){
     memcpy(&(tmtc_buffer->recv_num), target + 113, 1);
     //seu measurement
     memcpy(&(tmtc_buffer->seu1), target + 119, 2);
+    big2little_endian(&(tmtc_buffer->seu1), 2);
     memcpy(&(tmtc_buffer->seu2), target + 121, 2);
+    big2little_endian(&(tmtc_buffer->seu2), 2);
     memcpy(&(tmtc_buffer->seu3), target + 123, 2);
+    big2little_endian(&(tmtc_buffer->seu3), 2);
     //checksum
     memcpy(&(tmtc_buffer->checksum), target + 125, 1);
 
