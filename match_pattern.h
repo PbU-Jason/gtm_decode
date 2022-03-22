@@ -54,6 +54,8 @@ typedef struct Event
 
 typedef struct Tmtc
 {
+    unsigned char head[2];
+    unsigned char tail[2];
     Gtm_module gtm_module;
     uint16_t packet_counter;
     uint16_t pps_counter;
