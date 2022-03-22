@@ -11,7 +11,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-typedef enum{
+typedef enum
+{
     MASTER,
     SLAVE
 } Gtm_module;
@@ -43,7 +44,7 @@ typedef struct Event
 {
     Gtm_module gtm_module;
     uint16_t pps_counter;
-    uint8_t cmd_seq_num;    //CMD-SAD sequence number
+    uint8_t cmd_seq_num; // CMD-SAD sequence number
     uint32_t fine_counter;
     uint8_t citiroc_id;
     uint8_t channel_id;
@@ -91,28 +92,28 @@ typedef struct Tmtc
 } Tmtc;
 
 extern int sync_data_buffer_counter;
-extern unsigned char* sync_data_buffer;
+extern unsigned char *sync_data_buffer;
 extern int tmtc_data_buffer_counter;
-extern unsigned char* tmtc_data_buffer;
-extern Time* time_buffer;
-extern Time* time_start;
-extern Position* position_buffer;
-extern Position* pre_position;
-extern Event* event_buffer;
-extern Tmtc* tmtc_buffer;
+extern unsigned char *tmtc_data_buffer;
+extern Time *time_buffer;
+extern Time *time_start;
+extern Position *position_buffer;
+extern Position *pre_position;
+extern Event *event_buffer;
+extern Tmtc *tmtc_buffer;
 extern int missing_sync_data;
 extern int got_first_sync_data;
 extern int continuous_packet;
 
-void parse_utc_time(unsigned char* target);
-void parse_position(unsigned char* target);
-int is_sd_header(unsigned char* target);
-void parse_sd_header(unsigned char* target);
-int find_next_sd_header(unsigned char* buffer, size_t current_sd_header_location, size_t actual_buffer_size);
-void parse_science_packet(unsigned char* buffer, size_t max_location);
-int is_tmtc_header(unsigned char* target);
-int is_tmtc_tail(unsigned char* targrt);
-void parse_tmtc_packet(unsigned char* target);
+void parse_utc_time(unsigned char *target);
+void parse_position(unsigned char *target);
+int is_sd_header(unsigned char *target);
+void parse_sd_header(unsigned char *target);
+int find_next_sd_header(unsigned char *buffer, size_t current_sd_header_location, size_t actual_buffer_size);
+void parse_science_packet(unsigned char *buffer, size_t max_location);
+int is_tmtc_header(unsigned char *target);
+int is_tmtc_tail(unsigned char *targrt);
+void parse_tmtc_packet(unsigned char *target);
 
-void unit_test(unsigned char* target);
+void unit_test(unsigned char *target);
 #endif

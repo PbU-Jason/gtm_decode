@@ -5,12 +5,13 @@
 
 // the code is designed for little endian computers (like x86_64) !!
 
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
     set_argument(argc, argv);
     log_message("program start");
 
     check_endianness();
-    //create all the global buffer
+    // create all the global buffer
     create_all_buffer();
 
     switch (decode_mode)
@@ -30,7 +31,7 @@ int main(int argc, char **argv){
 
     close_all_file();
     destroy_all_buffer();
-    
+
     log_message("program finished");
     return 0;
 }
