@@ -49,14 +49,25 @@ void parse_utc_time_tmtc(unsigned char *target)
 }
 
 // should be wrote later when the format is clear, it's a place holder now
-void parse_utc_time(unsigned char *target)
+void parse_utc_time_sync(unsigned char *target)
 {
-    // set all to 0 for now
-    time_buffer->year = 0;
-    time_buffer->day = 0;
-    time_buffer->hour = 0;
-    time_buffer->minute = 0;
-    time_buffer->sec = 0;
+    uint8_t sec, sub_sec;
+    // day
+    memcpy(&(time_buffer->day), target + 2, 2);
+    big2little_endian(&(time_buffer->day), 2);
+    // hour
+    memcpy(&(time_buffer->hour), target + 4, 1);
+    // minute
+    memcpy(&(time_buffer->minute), target + 5, 1);
+    // sec
+    memcpy(&sec, target + 6, 1);
+    // sub sec (ms)
+    memcpy(&sub_sec, target + 7, 1);
+    //merge sec and sun sec
+    time_buffer->sec = (float) sec + ((float) sub_sec)*0.001;
+
+
+
     return;
 }
 
@@ -190,13 +201,8 @@ static void write_sync_data(void)
 
 static void parse_sync_data(unsigned char *target)
 {
-    unsigned char *buffer;
-
-    buffer = (unsigned char *)malloc(2);
-    if (!buffer)
-    {
-        log_error("can't allocate buffer in parse_sync_data()");
-    }
+    unsigned char buffer[2] = "00";
+    Time time_before;
 
     // pps count
     memcpy(buffer, target + 1, 2);
@@ -206,14 +212,16 @@ static void parse_sync_data(unsigned char *target)
     // CMD-SAD sequence number
     memcpy(&(event_buffer->cmd_seq_num), buffer + 24, 1);
     // UTC
-    parse_utc_time(target + 4);
+    memcpy(&time_before, time_buffer, sizeof(Time));
+    parse_utc_time_sync(target + 4);
     // ECI position stuff
     parse_position(target + 10);
 
-    // reset fine counter
-    event_buffer->fine_counter = 0;
+    // reset fine counter if UTC time is different
+    if (memcmp(&time_before, time_buffer, sizeof(Time)) != 0){
+        event_buffer->fine_counter = 0;
+    }
 
-    free(buffer);
     write_sync_data();
 }
 
@@ -275,9 +283,9 @@ static void parse_event_data(unsigned char *target)
         free(buffer);
         // update time buffer
         // fine counter has reset
-        if (event_buffer->fine_counter < old_fine_counter)
+        if (old_fine_counter == 0)
         {
-            time_buffer->sec = time_buffer->sec + (event_buffer->fine_counter + (4194303 - old_fine_counter)) * 0.24 * 0.000001;
+            time_buffer->sec = time_buffer->sec + event_buffer->fine_counter * 0.24 * 0.000001;
         }
         else
         {
