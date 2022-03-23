@@ -208,10 +208,10 @@ void open_all_file(char *input_file_path, char *out_file_path)
     char pipeline_pos_postfix[] = "_pipeline_position.txt";
     char *raw_outpath = NULL, *pipeline_outpath = NULL, *pipeline_pos_outpath = NULL;
 
-    size_prefix = sizeof(out_file_path);
-    size_postfix_raw = sizeof(raw_postfix);
-    size_postfix_pipeline = sizeof(pipeline_postfix);
-    size_postfix_pipeline_pos = sizeof(pipeline_pos_postfix);
+    size_prefix = strlen(out_file_path);
+    size_postfix_raw = strlen(raw_postfix);
+    size_postfix_pipeline = strlen(pipeline_postfix);
+    size_postfix_pipeline_pos = strlen(pipeline_pos_postfix);
 
     // figure out full output file path
     raw_outpath = (char *)malloc(size_prefix + size_postfix_raw);
@@ -264,7 +264,7 @@ void open_all_file(char *input_file_path, char *out_file_path)
             }
             if (decode_mode == 1)
             {
-                fprintf(out_file_raw, tmtc_raw_header);
+                fputs(tmtc_raw_header, out_file_raw);
             }
         }
         if (export_mode == 1 || export_mode == 2)
