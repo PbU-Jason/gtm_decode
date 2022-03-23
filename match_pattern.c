@@ -436,7 +436,7 @@ void write_tmtc_buffer(void)
         {
             fprintf(out_file_raw, ";%3u", tmtc_buffer->citiroc2_hit[i]);
         }
-        fprintf(out_file_raw, ";%5u;%5u;%3u;%3u;%3u;%3u;%3u;%3u;%3u;%5u;%5u;%3u;%3u;%3u;%5u;%5u;%5u;%3u", tmtc_buffer->citiroc1_trigger, tmtc_buffer->citiroc2_trigger, tmtc_buffer->counter_period, tmtc_buffer->hv_dac1, tmtc_buffer->hv_dac2, tmtc_buffer->spw_a_error_count, tmtc_buffer->spw_b_error_count, tmtc_buffer->spw_a_last_receive, tmtc_buffer->spw_b_last_receive, tmtc_buffer->spw_a_status, tmtc_buffer->spw_b_status, tmtc_buffer->recv_checksum, tmtc_buffer->calc_checksum, tmtc_buffer->recv_checksum, tmtc_buffer->seu1, tmtc_buffer->seu2, tmtc_buffer->seu3, tmtc_buffer->checksum);
+        fprintf(out_file_raw, ";%5u;%5u;%3u;%3u;%3u;%3u;%3u;%3u;%3u;%5u;%5u;%3u;%3u;%3u;%5u;%5u;%5u;%3u", tmtc_buffer->citiroc1_trigger, tmtc_buffer->citiroc2_trigger, tmtc_buffer->counter_period, tmtc_buffer->hv_dac1, tmtc_buffer->hv_dac2, tmtc_buffer->spw_a_error_count, tmtc_buffer->spw_b_error_count, tmtc_buffer->spw_a_last_receive, tmtc_buffer->spw_b_last_receive, tmtc_buffer->spw_a_status, tmtc_buffer->spw_b_status, tmtc_buffer->recv_checksum, tmtc_buffer->calc_checksum, tmtc_buffer->recv_num, tmtc_buffer->seu1, tmtc_buffer->seu2, tmtc_buffer->seu3, tmtc_buffer->checksum);
         fprintf(out_file_raw, ";%0X%0X\n", tmtc_buffer->tail[0], tmtc_buffer->tail[1]); // tail
     }
     /*
@@ -507,8 +507,10 @@ void parse_tmtc_packet(unsigned char *target)
     memcpy(&(tmtc_buffer->spw_a_last_receive), target + 104, 1);
     memcpy(&(tmtc_buffer->spw_b_error_count), target + 105, 1);
     memcpy(&(tmtc_buffer->spw_b_last_receive), target + 106, 1);
-    memcpy(&(tmtc_buffer->spw_a_status), target + 107, 1);
-    memcpy(&(tmtc_buffer->spw_b_status), target + 109, 1);
+    memcpy(&(tmtc_buffer->spw_a_status), target + 107, 2);
+    big2little_endian(&(tmtc_buffer->spw_a_status), 2);
+    memcpy(&(tmtc_buffer->spw_b_status), target + 109, 2);
+    big2little_endian(&(tmtc_buffer->spw_b_status), 2);
     // checksum
     memcpy(&(tmtc_buffer->recv_checksum), target + 111, 1);
     memcpy(&(tmtc_buffer->calc_checksum), target + 112, 1);
