@@ -52,9 +52,10 @@ void parse_utc_time_tmtc(unsigned char *target)
 void parse_utc_time_sync(unsigned char *target)
 {
     uint8_t sec, sub_sec;
+    //year
+    time_buffer->year = 2022;
     // day
     memcpy(&(time_buffer->day), target + 2, 2);
-    big2little_endian(&(time_buffer->day), 2);
     // hour
     memcpy(&(time_buffer->hour), target + 4, 1);
     // minute
@@ -65,8 +66,6 @@ void parse_utc_time_sync(unsigned char *target)
     memcpy(&sub_sec, target + 7, 1);
     //merge sec and sun sec
     time_buffer->sec = (float) sec + ((float) sub_sec)*0.001;
-
-
 
     return;
 }
@@ -214,6 +213,8 @@ static void parse_sync_data(unsigned char *target)
     // UTC
     memcpy(&time_before, time_buffer, sizeof(Time));
     parse_utc_time_sync(target + 4);
+    log_message("day %u, hour %u, min %u, sec %f", time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
+    exit(1);
     // ECI position stuff
     parse_position(target + 10);
 
@@ -369,6 +370,7 @@ void parse_science_packet(unsigned char *buffer, size_t max_location)
         // always look for sync data header
         if (is_sync_header(current_location))
         {
+            log_message("location2 %zu", 3*i);
             missing_sync_data = 1;
             sync_data_buffer_counter = 0;
             memcpy(sync_data_buffer, current_location, 3);
