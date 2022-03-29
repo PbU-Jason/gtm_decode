@@ -4,10 +4,12 @@
 #include "parse_tmtc_data.h"
 #include "extract_science_data.h"
 
-// the code is designed for little endian computers (like x86_64) !!
+char welcome_str[]="GTM decoder -- decode GTM binary file to human readable data\ntips:use --help flag to see how to use\n";
 
+// the code is designed for little endian computers (like x86_64) !!
 int main(int argc, char **argv)
 {
+    puts(welcome_str);
     set_argument(argc, argv);
     log_message("program start");
 
