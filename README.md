@@ -51,3 +51,11 @@ for any corresponding short options.
 ```
 
 Notice that input file, output file and decode mode is required.
+
+## Output file
+### Decode mode 0
+depends on export mode, there might be pipeline_scienceraw.txt, pipeline_sciencepipeline.txt and pipeline_sciencepipeline_pos.txt
+### Docde mode 1
+prefix_tmtc.csv
+### Docde mode 2
+prefix_extracted.bin
