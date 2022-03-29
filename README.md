@@ -1,5 +1,6 @@
 # gtm_decode
 a WIP gtm decoder
+README version: 20220329
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -22,15 +23,20 @@ gcc *.c -o gtm_decoder -IC:\cygwin64\usr\include -LC:\cygwin64\usr\lib -largp -O
 ## Use
 ```
 GTM decoder -- decode GTM binary file to human readable data
-The pipeline output is not supported yet
+tips:use --help flag to see how to use
+
+Usage: gtm_decoder [OPTION...] use --help flag to see more detail
+GTM decoder -- decode GTM binary file to human readable data
 
   -b, --buffer-size=Bytes    The max buffer size while loading the binary file.
                              The defalt size is 1 GB
-  -e, --export-mode=Num      the export mode, 0 = output raw format, 1 = output
-                             pipeline format, 2 = output both, default 0
+  -e, --export-mode=Num      the export mode, for deocde mode 0 only. 0 =
+                             output raw format, 1 = output pipeline format, 2 =
+                             output both, default 0
   -i, --input=FILE           Required!!, The input binary file
   -m, --decode-mode=Num      Required!!, the decode mode, 0 = decode science
-                             data, 1 = decode telemetry data
+                             data, 1 = decode telemetry data, 2 = extract
+                             science data
   -o, --output=FILE          Required!!, The output filename prefix
   -s, --silent               no log and error message
   -t, --terminal-out         deocder will ignore output file and dump all the
@@ -41,27 +47,7 @@ The pipeline output is not supported yet
 
 Mandatory or optional arguments to long options are also mandatory or optional
 for any corresponding short options.
+
 ```
 
 Notice that input file, output file and decode mode is required.
-## Output file format
-### Science data
-```
-sd header: [sequence number]
-sync: [pps count] [cmd sequence number]
-event time: [fine count]
-event adc: [pps count] [fine count] [gtm module] [citiroc id] [channel id] [gain] [adc value]
-```
-gtm module: 0=master, 1=slave
-citiroc id: 0=a, 1=b
-gain: 0=LG, 1=HG
-### Telemetry data
-```
-[gtm module] [Packet Counter] [Lastest PPS Counter] [Lastest Fine Time Counter Value Between 2 PPS] [Board Temperature#1] [Board Temperature#2] [CITIROC1 Temperature#1] [CITIROC1 Temperature#2] [CITIROC2 Temperature#1] [CITIROC2 Temperature#2] [CITIROC1 Live time] [CITIROC2 Live time] [CITIROC1 Hit Counter#0 ] ~ [CITIROC1 Hit Counter#31 ] [CITIROC2 Hit Counter#0 ] ~ [CITIROC2 Hit Counter#31 ] [CITIROC1 Trigger counter] [CITIROC2 Trigger counter] [Counter period Setting] [HV DAC1] [HV DAC2] [SPW#A Error count] [SPW#B Error count] [SPW#A Last Recv Byte] [SPW#A Last Recv Byte] [SPW#A status] [SPW#B status] [Recv Checksum of Last CMD] [Calc Checksum of Last CMD] [Number of Recv CMDs] [SEU-Measurement#1] [SEU-Measurement#2] [SEU-Measurement#3] [checksum]
-```
-## Todo
-### pipeline format
-
-- parse UTC data
-- adc value to energy
-- GTM ID, citiroc ID, channel ID to detector ID
