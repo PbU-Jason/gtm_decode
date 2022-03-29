@@ -18,16 +18,16 @@ int main(int argc, char **argv)
     switch (decode_mode)
     {
     case 0:
-        log_message("start extracting science data");
-        extract_science_data();
-        log_message("finish extracting science data");
-        
         log_message("start decoding science data");
         parse_science_data();
         break;
     case 1:
         log_message("start decoding telemetry data");
         parse_tmtc_data();
+        break;
+    case 2:
+        log_message("start extracting science data");
+        extract_science_data();
         break;
     default:
         log_error("unknown decode mode");

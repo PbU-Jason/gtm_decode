@@ -441,32 +441,18 @@ void write_tmtc_buffer(void)
 {
     int i;
 
-    if (export_mode == 0 || export_mode == 2)
+    fprintf(out_file_raw, "%0X%0X", tmtc_buffer->head[0], tmtc_buffer->head[1]); // head
+    fprintf(out_file_raw, ";%3u;%5u;%5u;%5u;%3u;%3u;%.3f;%5u;%10u;%3u;%3u;%3u;%3u;%3u;%3u;%10u;%10u", tmtc_buffer->gtm_module, tmtc_buffer->packet_counter, time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec, tmtc_buffer->pps_counter, tmtc_buffer->fine_counter, tmtc_buffer->board_temp1, tmtc_buffer->board_temp2, tmtc_buffer->citiroc1_temp1, tmtc_buffer->citiroc1_temp2, tmtc_buffer->citiroc2_temp1, tmtc_buffer->citiroc2_temp2, tmtc_buffer->citiroc1_livetime, tmtc_buffer->citiroc2_livetime);
+    for (i = 0; i < 32; ++i)
     {
-        fprintf(out_file_raw, "%0X%0X", tmtc_buffer->head[0], tmtc_buffer->head[1]); // head
-        fprintf(out_file_raw, ";%3u;%5u;%5u;%5u;%3u;%3u;%.3f;%5u;%10u;%3u;%3u;%3u;%3u;%3u;%3u;%10u;%10u", tmtc_buffer->gtm_module, tmtc_buffer->packet_counter, time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec, tmtc_buffer->pps_counter, tmtc_buffer->fine_counter, tmtc_buffer->board_temp1, tmtc_buffer->board_temp2, tmtc_buffer->citiroc1_temp1, tmtc_buffer->citiroc1_temp2, tmtc_buffer->citiroc2_temp1, tmtc_buffer->citiroc2_temp2, tmtc_buffer->citiroc1_livetime, tmtc_buffer->citiroc2_livetime);
-        for (i = 0; i < 32; ++i)
-        {
-            fprintf(out_file_raw, ";%3u", tmtc_buffer->citiroc1_hit[i]);
-        }
-        for (i = 0; i < 32; ++i)
-        {
-            fprintf(out_file_raw, ";%3u", tmtc_buffer->citiroc2_hit[i]);
-        }
-        fprintf(out_file_raw, ";%5u;%5u;%3u;%3u;%3u;%3u;%3u;%3u;%3u;%5u;%5u;%3u;%3u;%3u;%5u;%5u;%5u;%3u", tmtc_buffer->citiroc1_trigger, tmtc_buffer->citiroc2_trigger, tmtc_buffer->counter_period, tmtc_buffer->hv_dac1, tmtc_buffer->hv_dac2, tmtc_buffer->spw_a_error_count, tmtc_buffer->spw_b_error_count, tmtc_buffer->spw_a_last_receive, tmtc_buffer->spw_b_last_receive, tmtc_buffer->spw_a_status, tmtc_buffer->spw_b_status, tmtc_buffer->recv_checksum, tmtc_buffer->calc_checksum, tmtc_buffer->recv_num, tmtc_buffer->seu1, tmtc_buffer->seu2, tmtc_buffer->seu3, tmtc_buffer->checksum);
-        fprintf(out_file_raw, ";%0X%0X\n", tmtc_buffer->tail[0], tmtc_buffer->tail[1]); // tail
+        fprintf(out_file_raw, ";%3u", tmtc_buffer->citiroc1_hit[i]);
     }
-    /*
-    if (export_mode == 1 || export_mode == 2){
-        if (! got_first_time_info){
-            fprintf(out_file_pipeline, "Start time:%5i;%5i;%3i;%3i;%f\n", time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
-            fprintf(out_file_pipeline, "time;qw;qx;qy;qz;ECIx;ECIy;ECIz\n"); //header
-            memcpy(time_start, time_buffer, sizeof(Time));
-            got_first_time_info = 1;
-        }
-        fprintf(out_file_pipeline, "%f;%5i;%5i;%5i;%5i;%10i;%10i;%10i\n", find_time_delta(time_start, time_buffer), position_buffer->quaternion1, position_buffer->quaternion2, position_buffer->quaternion3, position_buffer->quaternion4, position_buffer->x, position_buffer->y, position_buffer->z);
+    for (i = 0; i < 32; ++i)
+    {
+        fprintf(out_file_raw, ";%3u", tmtc_buffer->citiroc2_hit[i]);
     }
-    */
+    fprintf(out_file_raw, ";%5u;%5u;%3u;%3u;%3u;%3u;%3u;%3u;%3u;%5u;%5u;%3u;%3u;%3u;%5u;%5u;%5u;%3u", tmtc_buffer->citiroc1_trigger, tmtc_buffer->citiroc2_trigger, tmtc_buffer->counter_period, tmtc_buffer->hv_dac1, tmtc_buffer->hv_dac2, tmtc_buffer->spw_a_error_count, tmtc_buffer->spw_b_error_count, tmtc_buffer->spw_a_last_receive, tmtc_buffer->spw_b_last_receive, tmtc_buffer->spw_a_status, tmtc_buffer->spw_b_status, tmtc_buffer->recv_checksum, tmtc_buffer->calc_checksum, tmtc_buffer->recv_num, tmtc_buffer->seu1, tmtc_buffer->seu2, tmtc_buffer->seu3, tmtc_buffer->checksum);
+    fprintf(out_file_raw, ";%0X%0X\n", tmtc_buffer->tail[0], tmtc_buffer->tail[1]); // tail
 }
 
 void parse_tmtc_packet(unsigned char *target)

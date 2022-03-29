@@ -6,18 +6,21 @@
 
 void extract_science_data(void)
 {
-    unsigned char* nspo_data_buffer = NULL;
-    unsigned char* pre_binary_buffer = NULL;
+    unsigned char *nspo_data_buffer = NULL;
+    unsigned char *pre_binary_buffer = NULL;
     int nspo_data_buffer_counter = 0;
     size_t actual_binary_buffer_size = 0;
     long long int location;
+    int i;
 
-    nspo_data_buffer = (unsigned char*) malloc(NSPO_DATA_SIZE);
-    if (! nspo_data_buffer){
+    nspo_data_buffer = (unsigned char *)malloc(NSPO_DATA_SIZE);
+    if (!nspo_data_buffer)
+    {
         log_error("fail to create NSPO data buffer");
     }
-    pre_binary_buffer = (unsigned char*) malloc(NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE);
-    if (! pre_binary_buffer){
+    pre_binary_buffer = (unsigned char *)malloc(NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE);
+    if (!pre_binary_buffer)
+    {
         log_error("fail to create pre binary buffer");
     }
 
@@ -29,13 +32,16 @@ void extract_science_data(void)
         location = 0;
         while (location < actual_binary_buffer_size)
         {
-            if (location >=0 ){
+            if (location >= 0)
+            {
                 memcpy(nspo_data_buffer + nspo_data_buffer_counter, binary_buffer + location, 1);
             }
-            else if (location >= -(NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE)){
-                memcmp(nspo_data_buffer + nspo_data_buffer_counter, pre_binary_buffer + location + NSPO_EPOCH_HEADER_SIZE+NSPO_SYNC_MARKER_SIZE);
+            else if (location >= -(NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE))
+            {
+                memcmp(nspo_data_buffer + nspo_data_buffer_counter, pre_binary_buffer + location + NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE, 1);
             }
-            else{
+            else
+            {
                 log_error("try to access outside pre_binary_buffer boundary");
             }
             nspo_data_buffer_counter++;
@@ -45,12 +51,15 @@ void extract_science_data(void)
                 if (!is_nspo_header(nspo_data_buffer))
                 { // is not nspo header
                     nspo_data_buffer_counter = 0;
-                    location-=NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE - 1;
+                    location -= NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE - 1;
                 }
             }
             if (nspo_data_buffer_counter == NSPO_DATA_SIZE)
             { // all nspo data is loaded into buffer
-
+                for (i = NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE + NSPO_FRAME_HEADER_SIZE; i < NSPO_DATA_SIZE - NSPO_TRAILER_SIZE; ++i)
+                {
+                    fprintf(out_file_raw, "%c", nspo_data_buffer[i]);
+                }
                 nspo_data_buffer_counter = 0;
             }
 
