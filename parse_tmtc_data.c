@@ -4,13 +4,22 @@
 #include "utility.h"
 #include "match_pattern.h"
 #include "argument_parser.h"
+#include "parse_tmtc_data.h"
 
 // the code is designed for little endian computers (like x86_64) !!
 
 void parse_tmtc_data(void)
 {
+    unsigned char *tmtc_data_buffer;
     size_t actual_binary_buffer_size = 0;
     size_t location;
+    int tmtc_data_buffer_counter;
+
+    tmtc_data_buffer = (unsigned char *)malloc(TMTC_DATA_SIZE);
+    if (!tmtc_data_buffer)
+    {
+        log_error("fail to create tmtc data buffer");
+    }
 
     actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
     // loop through buffer
@@ -51,4 +60,6 @@ void parse_tmtc_data(void)
         }
         actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
     }
+
+    free(tmtc_data_buffer);
 }

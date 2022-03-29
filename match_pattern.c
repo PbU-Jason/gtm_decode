@@ -15,7 +15,6 @@ Position *pre_position = NULL;
 Event *event_buffer = NULL;
 Tmtc *tmtc_buffer;
 int sync_data_buffer_counter = 0;
-int tmtc_data_buffer_counter = 0;
 int missing_sync_data = 0;
 int got_first_sync_data = 0;
 int continuous_packet = 1;
@@ -82,6 +81,14 @@ void parse_position(unsigned char *target)
     memcpy(&(position_buffer->quaternion2), target + 26, 2);
     memcpy(&(position_buffer->quaternion3), target + 28, 2);
     memcpy(&(position_buffer->quaternion4), target + 30, 2);
+}
+
+//chech epoch + sync marker
+int is_nspo_header(unsigned char *target){
+    static unsigned char epoch_ref[14]={0x44, 0x69, 0x00, 0x23, 0x62, 0x3B};
+    static unsigned char sync_mark_ref[4]={0x1A, 0xCF, 0xFC, 0x1D};
+
+    return ((! memcmp(target, epoch_ref, 6)) && (! memcmp(target+10, sync_mark_ref, 4)));
 }
 
 // since sd header's head has some prob in current test data, reduce some matching pattern

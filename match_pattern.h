@@ -1,6 +1,11 @@
 #ifndef BIT_SHIFT_H
 #define BIT_SHIFT_H
 
+#define NSPO_DATA_SIZE 1129
+#define NSPO_EPOCH_HEADER_SIZE 10
+#define NSPO_SYNC_MARKER_SIZE 4
+#define NSPO_FRAME_HEADER_SIZE 6
+#define NSPO_TRAILER_SIZE 4
 #define SCIENCE_DATA_SIZE 1104
 #define SD_HEADER_SIZE 6
 #define SYNC_DATA_SIZE 45
@@ -93,20 +98,20 @@ typedef struct Tmtc
 
 extern int sync_data_buffer_counter;
 extern unsigned char *sync_data_buffer;
-extern int tmtc_data_buffer_counter;
-extern unsigned char *tmtc_data_buffer;
 extern Time *time_buffer;
 extern Time *time_start;
 extern Position *position_buffer;
 extern Position *pre_position;
 extern Event *event_buffer;
 extern Tmtc *tmtc_buffer;
-extern int missing_sync_data;
-extern int got_first_sync_data;
+extern int missing_sync_data;   // =1 after sync data with no tail
+extern int got_first_sync_data; // =1 after parsing first sync data
 extern int continuous_packet;
 
-void parse_utc_time(unsigned char *target);
+void parse_utc_time_tmtc(unsigned char *target);
+void parse_utc_time_sync(unsigned char *target);
 void parse_position(unsigned char *target);
+int is_nspo_header(unsigned char *target);
 int is_sd_header(unsigned char *target);
 void parse_sd_header(unsigned char *target);
 int find_next_sd_header(unsigned char *buffer, size_t current_sd_header_location, size_t actual_buffer_size);

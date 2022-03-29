@@ -2,6 +2,7 @@
 #include "argument_parser.h"
 #include "parse_science_data.h"
 #include "parse_tmtc_data.h"
+#include "extract_science_data.h"
 
 // the code is designed for little endian computers (like x86_64) !!
 
@@ -17,6 +18,10 @@ int main(int argc, char **argv)
     switch (decode_mode)
     {
     case 0:
+        log_message("start extracting science data");
+        extract_science_data();
+        log_message("finish extracting science data");
+        
         log_message("start decoding science data");
         parse_science_data();
         break;

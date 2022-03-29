@@ -69,5 +69,10 @@ static struct argp argp = {options, parse_opt, args_doc, doc};
 void set_argument(int argc, char **argv)
 {
   argp_parse(&argp, argc, argv, 0, 0, NULL);
+  
+  //modified exort mode based on decode mode
+  if (decode_mode == 1 || decode_mode == 2){  //no pipeline output for tmtc and nspo data
+    export_mode = 0;
+  }
   open_all_file(input_file_path, output_file_path);
 }

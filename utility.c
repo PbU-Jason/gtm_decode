@@ -6,6 +6,7 @@
 #include "utility.h"
 #include "match_pattern.h"
 
+//global variables
 size_t max_binary_buffer_size = 1174405120; // 1GB
 int decode_mode = 0;
 int export_mode = 0;
@@ -17,7 +18,7 @@ FILE *out_file_raw = NULL;
 FILE *out_file_pipeline = NULL;
 FILE *out_file_pipeline_pos = NULL;
 
-// local variable
+//local variable
 char tmtc_raw_header[] = "head;gtm module;Packet Counter;year;day;hour;minute;sec;Lastest PPS Counter;Lastest Fine Time Counter Value Between 2 PPS;Board Temperature#1;Board Temperature#2;CITIROC1 Temperature#1;CITIROC1 Temperature#2;CITIROC2 Temperature#1;CITIROC2 Temperature#2;CITIROC1 Live time;CITIROC2 Live time;CITIROC1 Hit Counter#0;CITIROC1 Hit Counter#1;CITIROC1 Hit Counter#2;CITIROC1 Hit Counter#3;CITIROC1 Hit Counter#4;CITIROC1 Hit Counter#5;CITIROC1 Hit Counter#6;CITIROC1 Hit Counter#7;CITIROC1 Hit Counter#8;CITIROC1 Hit Counter#9;CITIROC1 Hit Counter#10;CITIROC1 Hit Counter#11;CITIROC1 Hit Counter#12;CITIROC1 Hit Counter#13;CITIROC1 Hit Counter#14;CITIROC1 Hit Counter#15;CITIROC1 Hit Counter#16;CITIROC1 Hit Counter#17;CITIROC1 Hit Counter#18;CITIROC1 Hit Counter#19;CITIROC1 Hit Counter#20;CITIROC1 Hit Counter#21;CITIROC1 Hit Counter#22;CITIROC1 Hit Counter#23;CITIROC1 Hit Counter#24;CITIROC1 Hit Counter#25;CITIROC1 Hit Counter#26;CITIROC1 Hit Counter#27;CITIROC1 Hit Counter#28;CITIROC1 Hit Counter#29;CITIROC1 Hit Counter#30;CITIROC1 Hit Counter#31;CITIROC2 Hit Counter#0;CITIROC2 Hit Counter#1;CITIROC2 Hit Counter#2;CITIROC2 Hit Counter#3;CITIROC2 Hit Counter#4;CITIROC2 Hit Counter#5;CITIROC2 Hit Counter#6;CITIROC2 Hit Counter#7;CITIROC2 Hit Counter#8;CITIROC2 Hit Counter#9;CITIROC2 Hit Counter#10;CITIROC2 Hit Counter#11;CITIROC2 Hit Counter#12;CITIROC2 Hit Counter#13;CITIROC2 Hit Counter#14;CITIROC2 Hit Counter#15;CITIROC2 Hit Counter#16;CITIROC2 Hit Counter#17;CITIROC2 Hit Counter#18;CITIROC2 Hit Counter#19;CITIROC2 Hit Counter#20;CITIROC2 Hit Counter#21;CITIROC2 Hit Counter#22;CITIROC2 Hit Counter#23;CITIROC2 Hit Counter#24;CITIROC2 Hit Counter#25;CITIROC2 Hit Counter#26;CITIROC2 Hit Counter#27;CITIROC2 Hit Counter#28;CITIROC2 Hit Counter#29;CITIROC2 Hit Counter#30;CITIROC2 Hit Counter#31;CITIROC1 Trigger counter;CITIROC2 Trigger counter;Counter period Setting;HV DAC1;HV DAC2;SPW#A Error count;SPW#B Error count;SPW#A Last Recv Byte;SPW#B Last Recv Byte;SPW#A status;SPW#B status;Recv Checksum of Last CMD;Calc Checksum of Last CMD;Number of Recv CMDs;SEU-Measurement#1;SEU-Measurement#2;SEU-Measurement#3;checksum;tail\n";
 
 void log_message(const char *format, ...)
@@ -119,6 +120,7 @@ void left_shift_mem(unsigned char *target, size_t target_size, uint8_t bits)
     target[target_size - 1] = target[target_size - 1] << bits;
 }
 
+//allocate all global buffer
 void create_all_buffer(void)
 {
     binary_buffer = (unsigned char *)malloc(max_binary_buffer_size);
@@ -131,12 +133,6 @@ void create_all_buffer(void)
     if (!sync_data_buffer)
     {
         log_error("fail to create sync data buffer");
-    }
-
-    tmtc_data_buffer = (unsigned char *)malloc(TMTC_DATA_SIZE);
-    if (!tmtc_data_buffer)
-    {
-        log_error("fail to create tmtc data buffer");
     }
 
     time_buffer = (Time *)malloc(sizeof(Time));
@@ -180,7 +176,6 @@ void destroy_all_buffer(void)
 {
     free(binary_buffer);
     free(sync_data_buffer);
-    free(tmtc_data_buffer);
     free(time_buffer);
     free(time_start);
     free(position_buffer);
@@ -250,7 +245,7 @@ void open_all_file(char *input_file_path, char *out_file_path)
     }
     else
     {
-        if (export_mode != 0 && export_mode != 1 && export_mode != 2)
+        if (export_mode < 0 || export_mode >2)
         {
             log_error("unknown export mode");
         }
