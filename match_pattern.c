@@ -85,7 +85,7 @@ void parse_position(unsigned char *target)
 
 //chech epoch + sync marker
 int is_nspo_header(unsigned char *target){
-    static unsigned char epoch_ref[14]={0x44, 0x69, 0x00, 0x23, 0x62, 0x3B};
+    static unsigned char epoch_ref[6]={0x44, 0x69, 0x00, 0x23, 0x62, 0x31};
     static unsigned char sync_mark_ref[4]={0x1A, 0xCF, 0xFC, 0x1D};
 
     return ((! memcmp(target, epoch_ref, 6)) && (! memcmp(target+10, sync_mark_ref, 4)));

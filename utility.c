@@ -184,6 +184,7 @@ void destroy_all_buffer(void)
     free(tmtc_buffer);
 }
 
+//debug use, print from i=-back to i<=forward
 void print_buffer_around(unsigned char *target, int back, int forward)
 {
     int i;
@@ -192,7 +193,7 @@ void print_buffer_around(unsigned char *target, int back, int forward)
     {
         printf("%02x ", *(target + i));
     }
-    printf("\n-------------------------------\n");
+    printf("\n--------------------------------\n");
 }
 
 char *easy_strcat(char *prefix, char *postfix)
