@@ -56,7 +56,7 @@ Notice that input file, output file and decode mode is required.
 ## Output file
 ### Decode mode 0
 Depends on export mode, there might be prefix_science_raw.txt, prefix_science_pipeline.txt and prefix_science_pipeline_pos.txt
-#### prefix_science_raw.txt
+#### **prefix_science_raw.txt**
 ```
 sd header: [sequence number]
 sync: [pps count] [cmd sequence number]
@@ -67,7 +67,7 @@ gtm module: 0=master, 1=slave
 citiroc id: 0=a, 1=b
 gain: 0=LG, 1=HG
 
-#### prefix_science_pipeline.txt
+#### **prefix_science_pipeline.txt**
 the first line will contain start time.
 ```
 start time UTC,DD_MM_YY_HH_mm_sec
@@ -79,7 +79,28 @@ then there will be a csv table in format:
 time;detector;pixel;energy
 ```
 
-#### prefix_science_pipeline_pos.txt
+where:
+
+- time: sec away from start time
+
+- detector: based on gtm module, citiroc id, and channel id.
+
+
+  | detector id | GTM module | citiroc id | channel |
+  | ----------- | ---------- | ---------- | ------- |
+  | 1           | master     | 0 (A)      | 0 – 15  |
+  | 2           | master     | 0 (A)      | 16 – 31 |
+  | 3           | master     | 1 (B)      | 0 – 15  |
+  | 4           | master     | 1 (B)      | 16 – 31 |
+  | 5           | slave      | 0 (A)      | 0 – 15  |
+  | 6           | slave      | 0 (A)      | 16 – 31 |
+  | 7           | slave      | 1 (B)      | 0 – 15  |
+  | 8           | slave      | 1 (B)      | 16 – 31 |
+
+- pixel: equals (`channel id % 16 + 1`)
+- energy: in keV
+
+#### **prefix_science_pipeline_pos.txt**
 the first line will contain start time.
 ```
 start time UTC,DD_MM_YY_HH_mm_sec
