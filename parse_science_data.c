@@ -48,6 +48,7 @@ void parse_science_data(void)
             // if the packet is not continueous, reset related parameter
             if (!continuous_packet)
             {
+                log_message("uncontiuous occurs around bytes %lu", (size_t)ftell(bin_file) + sd_header_location);
                 got_first_sync_data = 0;
             }
 
@@ -55,7 +56,7 @@ void parse_science_data(void)
             old_sd_header_location = sd_header_location;
             sd_header_location = find_next_sd_header(binary_buffer, sd_header_location, actual_binary_buffer_size);
 
-            if (sd_header_location == -1)
+            if (sd_header_location == -1) // no next sd header is found
             {
                 // no next sd header and this is not the last buffer, load next buffer, don't parse the packet
                 if (actual_binary_buffer_size == max_binary_buffer_size)
@@ -73,7 +74,9 @@ void parse_science_data(void)
                     // it's the last buffer and this is the last packet
                     else
                     {
-                        sd_header_location = actual_binary_buffer_size;
+                        parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, actual_binary_buffer_size - old_sd_header_location - SD_HEADER_SIZE);
+                        full++;
+                        break;
                     }
                 }
             }
@@ -90,7 +93,7 @@ void parse_science_data(void)
                 if (sd_header_location - old_sd_header_location < SCIENCE_DATA_SIZE + SD_HEADER_SIZE)
                 {
                     log_message("packet size %zu bytes smaller than expected", sd_header_location - old_sd_header_location);
-                    parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, sd_header_location);
+                    parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, sd_header_location - old_sd_header_location - SD_HEADER_SIZE);
                 }
                 // if packet larger than expected, don't parse the packet
                 else
@@ -107,8 +110,8 @@ void parse_science_data(void)
             break;
         }
         // offset position indicator of input file stream based on previous sd header position
-        fseek(bin_file, sd_header_location - actual_binary_buffer_size, SEEK_CUR);
+        fseek(bin_file, old_sd_header_location - actual_binary_buffer_size, SEEK_CUR);
         actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
     }
-    printf("full = %zu, broken = %zu\n", full, broken);
+    log_message("packet summary: full = %zu, broken = %zu", full, broken);
 }

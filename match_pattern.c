@@ -129,17 +129,16 @@ void parse_sd_header(unsigned char *target)
     // make sure the sequence count is continuous
     if (sequence_count == 255)
     {
-        continuous_packet = (new_sequence_count == 0); // overflow is intended
+        continuous_packet = (new_sequence_count == 0);
     }
     else
     {
-        continuous_packet = (new_sequence_count == sequence_count + 1); // overflow is intended
+        continuous_packet = (new_sequence_count == sequence_count + 1);
     }
 
     if (!continuous_packet)
     {
-        log_message("uncontinuous packet");
-        printf("old sequence count = %i, new seqence count= %i\n", sequence_count, new_sequence_count);
+        log_message("sequence count not continuous, old sequence count = %i, new seqence count= %i\n", sequence_count, new_sequence_count);
     }
 
     sequence_count = new_sequence_count;
@@ -170,7 +169,6 @@ static void write_sync_data(void)
         if (!got_first_time_info)
         {
             get_month_and_mday();
-            log_message("day %i", time_buffer->day);
             fprintf(out_file_pipeline, "start time UTC,%02i_%02i_%04i_%02i_%02i_%0.6f\n", time_buffer->mday, time_buffer->month, time_buffer->year, time_buffer->hour, time_buffer->minute, calc_sec(time_buffer));
             fprintf(out_file_pipeline_pos, "start time UTC,%2i_%2i_%4i_%2i_%2i_%.6f\n", time_buffer->mday, time_buffer->month, time_buffer->year, time_buffer->hour, time_buffer->minute, calc_sec(time_buffer));
             fprintf(out_file_pipeline, "time;detector;pixel;energy\n");          // header

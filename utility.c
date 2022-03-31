@@ -327,14 +327,12 @@ void get_month_and_mday(void)
     time_old.tm_yday = 0;
     time_old.tm_isdst = 0;
 
-    log_message("time old year %i, days %i", time_old.tm_year, time_old.tm_yday);
     loctime = mktime(&time_old);
     time_new = localtime(&loctime);
     if (!time_new)
     {
         log_error("NULL time_new in get_month_and_mday");
     }
-    log_message("time new year %i, month %i, mday %i", time_new->tm_year, time_new->tm_mon, time_new->tm_mday);
     time_buffer->month = (uint8_t)time_new->tm_mon;
     time_buffer->mday = (uint8_t)time_new->tm_mday;
 }
