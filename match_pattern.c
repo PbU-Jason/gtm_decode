@@ -240,6 +240,7 @@ static void write_event_time(void)
 
 static void write_event_buffer(void)
 {
+    int detector, pixel;
     if (export_mode == 0 || export_mode == 2)
     {
         fprintf(out_file_raw, "event adc: ");
@@ -247,7 +248,9 @@ static void write_event_buffer(void)
     }
     if (export_mode == 1 || export_mode == 2)
     {
-        fprintf(out_file_pipeline, "%0.6f;0;0;%f\n", find_time_delta(time_start, time_buffer), event_buffer->energy);
+        detector = ((int)event_buffer->gtm_module + 1) * ((int)event_buffer->citiroc_id + 1) + (int)(event_buffer->channel_id / 16);
+        pixel = (int)event_buffer->channel_id % 16 + 1;
+        fprintf(out_file_pipeline, "%0.6f;%i;%i;%f\n", find_time_delta(time_start, time_buffer), detector, pixel, event_buffer->energy);
     }
 }
 
