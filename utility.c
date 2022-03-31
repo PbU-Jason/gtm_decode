@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdint.h>
+#include <time.h>
 #include "utility.h"
 #include "match_pattern.h"
 
@@ -74,36 +75,6 @@ void big2little_endian(void *target, size_t target_size)
     free(buffer);
 }
 
-unsigned char **create_2D_arr(size_t row, size_t col)
-{
-    size_t i;
-    unsigned char **arr;
-    arr = (unsigned char **)malloc(row * sizeof(unsigned char *));
-    if (!arr)
-    {
-        log_error("fail to allocate 2D arr level 1\n");
-    }
-    for (i = 0; i < row; i++)
-    {
-        arr[i] = (unsigned char *)malloc(col);
-        if (!arr[i])
-        {
-            log_error("fail to allocate 2D arr level 2\n");
-        }
-    }
-    return arr;
-}
-
-void destroy_2D_arr(unsigned char **arr, size_t row)
-{
-    size_t i;
-    for (i = 0; i < row; i++)
-    {
-        free(arr[i]);
-    }
-    free(arr);
-}
-
 // shift the array n bits left, you should make sure 0<=bits<=7
 void left_shift_mem(unsigned char *target, size_t target_size, uint8_t bits)
 {
@@ -140,6 +111,9 @@ void create_all_buffer(void)
     {
         log_error("faile to create time buffer");
     }
+    // initialize value
+    time_buffer->pps_counter = 0;
+    time_buffer->fine_counter = 0;
 
     time_start = (Time *)malloc(sizeof(Time));
     if (!time_start)
@@ -184,7 +158,7 @@ void destroy_all_buffer(void)
     free(tmtc_buffer);
 }
 
-//debug use, print from i=-back to i<=forward
+// debug use, print from i=-back to i<=forward
 void print_buffer_around(unsigned char *target, int back, int forward)
 {
     int i;
@@ -320,13 +294,47 @@ void close_all_file(void)
     log_message("close all file");
 }
 
+double calc_sec(Time *time)
+{
+    double total_sec;
+    total_sec = (double)time->sec + ((double)time->sub_sec) * 0.001 + (double)time->pps_counter + ((double)time->fine_counter) * 0.24 * 0.000001;
+    return total_sec;
+}
+
 double find_time_delta(Time *time_start, Time *time_end)
 {
     double del_sec = 0;
-    del_sec = del_sec + (time_end->year - time_start->year) * 31536000;
-    del_sec = del_sec + (time_end->day - time_start->day) * 86400;
-    del_sec = del_sec + (time_end->hour - time_start->hour) * 3600;
-    del_sec = del_sec + (time_end->minute - time_start->minute) * 60;
-    del_sec = del_sec + (time_end->sec - time_start->sec);
+    del_sec += (time_end->year - time_start->year) * 31536000;
+    del_sec += (time_end->day - time_start->day) * 86400;
+    del_sec += (time_end->hour - time_start->hour) * 3600;
+    del_sec += (time_end->minute - time_start->minute) * 60;
+    del_sec += (calc_sec(time_end) - calc_sec(time_start));
     return del_sec;
+}
+
+void get_month_and_mday(void)
+{
+    struct tm time_old, *time_new = NULL;
+    time_t loctime;
+
+    time_old.tm_sec = 0;
+    time_old.tm_min = 0;
+    time_old.tm_hour = 0;
+    time_old.tm_mday = (int)time_buffer->day;
+    time_old.tm_mon = 1;
+    time_old.tm_year = (int)time_buffer->year;
+    time_old.tm_wday = 0;
+    time_old.tm_yday = 0;
+    time_old.tm_isdst = 0;
+
+    log_message("time old year %i, days %i", time_old.tm_year, time_old.tm_yday);
+    loctime = mktime(&time_old);
+    time_new = localtime(&loctime);
+    if (!time_new)
+    {
+        log_error("NULL time_new in get_month_and_mday");
+    }
+    log_message("time new year %i, month %i, mday %i", time_new->tm_year, time_new->tm_mon, time_new->tm_mday);
+    time_buffer->month = (uint8_t)time_new->tm_mon;
+    time_buffer->mday = (uint8_t)time_new->tm_mday;
 }

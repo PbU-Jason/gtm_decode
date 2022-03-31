@@ -1,7 +1,7 @@
 # gtm_decode
 a WIP gtm decoder
 
-README version: 20220330
+README version: 20220331
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -68,8 +68,28 @@ citiroc id: 0=a, 1=b
 gain: 0=LG, 1=HG
 
 #### prefix_science_pipeline.txt
+the first line will contain start time.
+```
+start time UTC,DD_MM_YY_HH_mm_sec
+```
+where sec is a floating point number.
+
+then there will be a csv table in format:
+```
+time;detector;pixel;energy
+```
 
 #### prefix_science_pipeline_pos.txt
+the first line will contain start time.
+```
+start time UTC,DD_MM_YY_HH_mm_sec
+```
+where sec is a floating point number.
+
+then there will be a csv table in format:
+```
+time;qw;qx;qy;qz;ECIx;ECIy;ECIz
+```
 ### Docde mode 1
 There will be prefix_tmtc.csv
 

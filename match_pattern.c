@@ -25,8 +25,6 @@ int got_first_time_info = 0;
 
 void parse_utc_time_tmtc(unsigned char *target)
 {
-    uint8_t sec, sub_sec;
-
     // year
     memcpy(&(time_buffer->year), target, 2);
     big2little_endian(&(time_buffer->year), 2);
@@ -38,11 +36,9 @@ void parse_utc_time_tmtc(unsigned char *target)
     // minute
     memcpy(&(time_buffer->minute), target + 5, 1);
     // sec
-    memcpy(&sec, target + 6, 1);
+    memcpy(&(time_buffer->sec), target + 6, 1);
     // sub sec (ms)
-    memcpy(&sub_sec, target + 7, 1);
-    //merge sec and sun sec
-    time_buffer->sec = (float) sec + ((float) sub_sec)*0.001;
+    memcpy(&(time_buffer->sub_sec), target + 7, 1);
 
     return;
 }
@@ -50,21 +46,19 @@ void parse_utc_time_tmtc(unsigned char *target)
 // should be wrote later when the format is clear, it's a place holder now
 void parse_utc_time_sync(unsigned char *target)
 {
-    uint8_t sec, sub_sec;
-    //year
+    // year
     time_buffer->year = 2022;
     // day
-    memcpy(&(time_buffer->day), target + 2, 2);
+    memcpy(&(time_buffer->day), target, 2);
+    big2little_endian(&(time_buffer->day), 2);
     // hour
-    memcpy(&(time_buffer->hour), target + 4, 1);
+    memcpy(&(time_buffer->hour), target + 2, 1);
     // minute
-    memcpy(&(time_buffer->minute), target + 5, 1);
+    memcpy(&(time_buffer->minute), target + 3, 1);
     // sec
-    memcpy(&sec, target + 6, 1);
+    memcpy(&(time_buffer->sec), target + 4, 1);
     // sub sec (ms)
-    memcpy(&sub_sec, target + 7, 1);
-    //merge sec and sun sec
-    time_buffer->sec = (float) sec + ((float) sub_sec)*0.001;
+    memcpy(&(time_buffer->sub_sec), target + 5, 1);
 
     return;
 }
@@ -83,12 +77,13 @@ void parse_position(unsigned char *target)
     memcpy(&(position_buffer->quaternion4), target + 30, 2);
 }
 
-//chech epoch + sync marker
-int is_nspo_header(unsigned char *target){
-    static unsigned char epoch_ref[6]={0x44, 0x69, 0x00, 0x23, 0x62, 0x3B};
-    static unsigned char sync_mark_ref[4]={0x1A, 0xCF, 0xFC, 0x1D};
+// chech epoch + sync marker
+int is_nspo_header(unsigned char *target)
+{
+    static unsigned char epoch_ref[6] = {0x44, 0x69, 0x00, 0x23, 0x62, 0x3B};
+    static unsigned char sync_mark_ref[4] = {0x1A, 0xCF, 0xFC, 0x1D};
 
-    return ((! memcmp(target, epoch_ref, 6)) && (! memcmp(target+10, sync_mark_ref, 4)));
+    return ((!memcmp(target, epoch_ref, 6)) && (!memcmp(target + 10, sync_mark_ref, 4)));
 }
 
 // since sd header's head has some prob in current test data, reduce some matching pattern
@@ -107,21 +102,6 @@ int is_sd_header(unsigned char *target)
     }
     return 0;
 }
-/*
-int is_sd_header(unsigned char* target){
-    static unsigned char target_copy[SD_HEADER_SIZE];
-    static unsigned char ref_master[SD_HEADER_SIZE]={0x88, 0x55, 0xC0, 0x00, 0x04, 0x4f};
-    static unsigned char ref_slave[SD_HEADER_SIZE]={0x88, 0xAA, 0xC0, 0x00, 0x04, 0x4f};
-
-    //mask the sequence count byte
-    memcpy(target_copy, target, SD_HEADER_SIZE);
-    target_copy[3] = 0x00;
-
-    if (! memcmp(target_copy, ref_master, SD_HEADER_SIZE)){return 1;}
-    if (! memcmp(target_copy, ref_slave, SD_HEADER_SIZE)){return 1;}
-    return 0;
-}
-*/
 
 static void write_sd_header(uint8_t sequence_count)
 {
@@ -189,8 +169,10 @@ static void write_sync_data(void)
     {
         if (!got_first_time_info)
         {
-            fprintf(out_file_pipeline, "Start time:%5i;%5i;%3i;%3i;%f\n", time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
-            fprintf(out_file_pipeline_pos, "Start time:%5i;%5i;%3i;%3i;%f\n", time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
+            get_month_and_mday();
+            log_message("day %i", time_buffer->day);
+            fprintf(out_file_pipeline, "start time UTC,%02i_%02i_%04i_%02i_%02i_%0.6f\n", time_buffer->mday, time_buffer->month, time_buffer->year, time_buffer->hour, time_buffer->minute, calc_sec(time_buffer));
+            fprintf(out_file_pipeline_pos, "start time UTC,%2i_%2i_%4i_%2i_%2i_%.6f\n", time_buffer->mday, time_buffer->month, time_buffer->year, time_buffer->hour, time_buffer->minute, calc_sec(time_buffer));
             fprintf(out_file_pipeline, "time;detector;pixel;energy\n");          // header
             fprintf(out_file_pipeline_pos, "time;qw;qx;qy;qz;ECIx;ECIy;ECIz\n"); // header
             memcpy(time_start, time_buffer, sizeof(Time));
@@ -207,7 +189,7 @@ static void write_sync_data(void)
 
 static void parse_sync_data(unsigned char *target)
 {
-    unsigned char buffer[2] = "00";
+    unsigned char buffer[2];
     Time time_before;
 
     // pps count
@@ -220,13 +202,16 @@ static void parse_sync_data(unsigned char *target)
     // UTC
     memcpy(&time_before, time_buffer, sizeof(Time));
     parse_utc_time_sync(target + 4);
-    //log_message("day %u, hour %u, min %u, sec %f", time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
-    // ECI position stuff
+    // log_message("day %u, hour %u, min %u, sec %f", time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec);
+    //  ECI position stuff
     parse_position(target + 10);
 
-    // reset fine counter if UTC time is different
-    if (memcmp(&time_before, time_buffer, sizeof(Time)) != 0){
-        event_buffer->fine_counter = 0;
+    time_buffer->pps_counter++;
+    time_buffer->fine_counter = 0;
+    // if UTC update, reset out own pps
+    if (!memcmp(&time_before, time_buffer, 80)) // only compare the UTC part
+    {
+        time_buffer->pps_counter = 0;
     }
 
     write_sync_data();
@@ -262,7 +247,7 @@ static void write_event_buffer(void)
     }
     if (export_mode == 1 || export_mode == 2)
     {
-        fprintf(out_file_pipeline, "%f;0;0;%f\n", find_time_delta(time_start, time_buffer), event_buffer->energy);
+        fprintf(out_file_pipeline, "%0.6f;0;0;%f\n", find_time_delta(time_start, time_buffer), event_buffer->energy);
     }
 }
 
@@ -287,19 +272,8 @@ static void parse_event_data(unsigned char *target)
         big2little_endian(buffer, 4);
         old_fine_counter = event_buffer->fine_counter;
         memcpy(&(event_buffer->fine_counter), buffer, 4);
+        memcpy(&(time_buffer->fine_counter), buffer, 2);
         free(buffer);
-        // update time buffer
-        // fine counter has reset
-        if (old_fine_counter == 0)
-        {
-            time_buffer->sec = time_buffer->sec + event_buffer->fine_counter * 0.24 * 0.000001;
-        }
-        else
-        {
-            // log_message("old fine counter: %i, new: %i\n", old_fine_counter, event_buffer->fine_counter);
-            // log_message("del sec from fine counter: %f\n", (event_buffer->fine_counter - old_fine_counter) * 0.24 * 0.000001);
-            time_buffer->sec = time_buffer->sec + (event_buffer->fine_counter - old_fine_counter) * 0.24 * 0.000001;
-        }
 
         write_event_time();
         // log_message("update event time");
@@ -440,7 +414,7 @@ void write_tmtc_buffer(void)
     int i;
 
     fprintf(out_file_raw, "%0X%0X", tmtc_buffer->head[0], tmtc_buffer->head[1]); // head
-    fprintf(out_file_raw, ";%3u;%5u;%5u;%5u;%3u;%3u;%.3f;%5u;%10u;%3u;%3u;%3u;%3u;%3u;%3u;%10u;%10u", tmtc_buffer->gtm_module, tmtc_buffer->packet_counter, time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec, tmtc_buffer->pps_counter, tmtc_buffer->fine_counter, tmtc_buffer->board_temp1, tmtc_buffer->board_temp2, tmtc_buffer->citiroc1_temp1, tmtc_buffer->citiroc1_temp2, tmtc_buffer->citiroc2_temp1, tmtc_buffer->citiroc2_temp2, tmtc_buffer->citiroc1_livetime, tmtc_buffer->citiroc2_livetime);
+    fprintf(out_file_raw, ";%3u;%5u;%5u;%5u;%3u;%3u;%.3f;%5u;%10u;%3u;%3u;%3u;%3u;%3u;%3u;%10u;%10u", tmtc_buffer->gtm_module, tmtc_buffer->packet_counter, time_buffer->year, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec + time_buffer->sub_sec * 0.001, tmtc_buffer->pps_counter, tmtc_buffer->fine_counter, tmtc_buffer->board_temp1, tmtc_buffer->board_temp2, tmtc_buffer->citiroc1_temp1, tmtc_buffer->citiroc1_temp2, tmtc_buffer->citiroc2_temp1, tmtc_buffer->citiroc2_temp2, tmtc_buffer->citiroc1_livetime, tmtc_buffer->citiroc2_livetime);
     for (i = 0; i < 32; ++i)
     {
         fprintf(out_file_raw, ";%3u", tmtc_buffer->citiroc1_hit[i]);

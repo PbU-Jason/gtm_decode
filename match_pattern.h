@@ -25,10 +25,15 @@ typedef enum
 typedef struct Time
 {
     uint16_t year;
-    uint16_t day;
+    uint8_t month;
+    uint8_t mday; // this is the day in the month
+    uint16_t day; // this is the day from 1/1 of the year
     uint8_t hour;
     uint8_t minute;
-    double sec;
+    uint8_t sec;
+    uint8_t sub_sec;       // msec
+    uint16_t pps_counter;  // it's our own pps counter
+    uint32_t fine_counter; // 0.24 usec
 } Time;
 
 typedef struct Position

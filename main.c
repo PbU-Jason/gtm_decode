@@ -4,7 +4,7 @@
 #include "parse_tmtc_data.h"
 #include "extract_science_data.h"
 
-char welcome_str[]="GTM decoder -- decode GTM binary file to human readable data\ntips:use --help flag to see how to use\n";
+char welcome_str[] = "GTM decoder -- decode GTM binary file to human readable data\ntips:use --help flag to see how to use\n";
 
 // the code is designed for little endian computers (like x86_64) !!
 int main(int argc, char **argv)

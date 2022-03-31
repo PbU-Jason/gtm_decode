@@ -20,13 +20,13 @@ void log_message(const char *format, ...);
 void log_error(const char *format, ...);
 void check_endianness(void);
 void big2little_endian(void *target, size_t target_size);
-unsigned char **create_2D_arr(size_t row, size_t col);
-void destroy_2D_arr(unsigned char **arr, size_t row);
 void left_shift_mem(unsigned char *target_start, size_t target_size, uint8_t bits);
 void create_all_buffer(void);
 void destroy_all_buffer(void);
 void print_buffer_around(unsigned char *target, int back, int forward);
 void open_all_file(char *input_file_path, char *out_file_path);
 void close_all_file(void);
+double calc_sec(Time *time);
 double find_time_delta(Time *start, Time *end);
+void get_month_and_mday(void);
 #endif

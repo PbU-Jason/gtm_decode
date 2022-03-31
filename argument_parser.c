@@ -7,7 +7,7 @@ char *output_file_path = NULL;
 char doc[] =
     "GTM decoder -- decode GTM binary file to human readable data";
 char args_doc[] = "use --help flag to see more detail";
-char version_str[] = "20220329\n\0";
+char version_str[] = "20220331\n\0";
 
 static struct argp_option options[] = {
     {"input", 'i', "FILE", 0, "Required!!, The input binary file"},
@@ -70,25 +70,26 @@ void set_argument(int argc, char **argv)
 {
   argp_parse(&argp, argc, argv, 0, 0, NULL);
 
-  //make a small summary about the execution
+  // make a small summary about the execution
   log_message("execution summary------------------");
   printf("  GTM decodeder version: %s", version_str);
   switch (decode_mode)
   {
   case 0:
     puts("  decode mode set to 0, decoding science data");
-    switch(export_mode){
-      case 0:
-        puts("  export mode set to 0, export raw format only");
-        break;
-      case 1:
-        puts("  export mode set to 1, export pipeline format only");
-        break;
-      case 2:
-        puts("  export mode set to 2, export both raw and pipeline format");
-        break;
-      default:
-        log_error("unknown export mode");
+    switch (export_mode)
+    {
+    case 0:
+      puts("  export mode set to 0, export raw format only");
+      break;
+    case 1:
+      puts("  export mode set to 1, export pipeline format only");
+      break;
+    case 2:
+      puts("  export mode set to 2, export both raw and pipeline format");
+      break;
+    default:
+      log_error("unknown export mode");
     }
     break;
   case 1:
@@ -104,8 +105,9 @@ void set_argument(int argc, char **argv)
   printf("  input binary file: %s\n", input_file_path);
   puts("--------------------------------------------");
 
-  //modified exort mode based on decode mode
-  if (decode_mode == 1 || decode_mode == 2){  //no pipeline output for tmtc and nspo data
+  // modified exort mode based on decode mode
+  if (decode_mode == 1 || decode_mode == 2)
+  { // no pipeline output for tmtc and nspo data
     export_mode = 0;
   }
   open_all_file(input_file_path, output_file_path);
