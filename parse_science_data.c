@@ -48,7 +48,7 @@ void parse_science_data(void)
             // if the packet is not continueous, reset related parameter
             if (!continuous_packet)
             {
-                log_message("uncontiuous occurs around bytes %lu", (size_t)ftell(bin_file) + sd_header_location);
+                log_message("above uncontiuous occurs around bytes %zu", (size_t)ftell(bin_file) - actual_binary_buffer_size + sd_header_location);
                 got_first_sync_data = 0;
             }
 

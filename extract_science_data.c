@@ -11,6 +11,7 @@ void extract_science_data(void)
     int nspo_data_buffer_counter = 0;
     size_t actual_binary_buffer_size = 0;
     long long int location;
+    long long int nspo_packet_counter = 0;
     int i;
 
     nspo_data_buffer = (unsigned char *)malloc(NSPO_DATA_SIZE);
@@ -61,6 +62,7 @@ void extract_science_data(void)
                     fprintf(out_file_raw, "%c", nspo_data_buffer[i]);
                 }
                 nspo_data_buffer_counter = 0;
+                nspo_packet_counter++;
             }
 
             location++;
@@ -73,6 +75,7 @@ void extract_science_data(void)
         actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
     }
 
+    log_message("extract total %lli nspo packets", nspo_packet_counter);
     free(nspo_data_buffer);
     free(pre_binary_buffer);
 }

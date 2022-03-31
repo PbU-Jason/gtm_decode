@@ -138,7 +138,7 @@ void parse_sd_header(unsigned char *target)
 
     if (!continuous_packet)
     {
-        log_message("sequence count not continuous, old sequence count = %i, new seqence count= %i\n", sequence_count, new_sequence_count);
+        log_message("sequence count not continuous, old sequence count = %i, new seqence count= %i", sequence_count, new_sequence_count);
     }
 
     sequence_count = new_sequence_count;
