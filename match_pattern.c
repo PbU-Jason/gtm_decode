@@ -162,6 +162,7 @@ static void write_sync_data(void)
     if (export_mode == 0 || export_mode == 2)
     {
         fprintf(out_file_raw, "sync: %5u, %3u\n", event_buffer->pps_counter, event_buffer->cmd_seq_num);
+        fprintf(out_file_raw_sync, "%1u;%5u;%3u;%5u;%3u;%3u;%3u;%3u;%10u;%10u;%10u;%10u;%10u;%10u;%5u;%5u;%5u;%5u\n", event_buffer->gtm_module, event_buffer->pps_counter, event_buffer->cmd_seq_num, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec, time_buffer->sub_sec, position_buffer->x, position_buffer->y, position_buffer->z, position_buffer->x_velocity, position_buffer->y_velocity, position_buffer->z_velocity, position_buffer->quaternion1, position_buffer->quaternion2, position_buffer->quaternion3, position_buffer->quaternion4);
     }
 
     if (export_mode == 1 || export_mode == 2)

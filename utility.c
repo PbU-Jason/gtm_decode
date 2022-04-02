@@ -16,11 +16,13 @@ int debug_output = 1;
 unsigned char *binary_buffer = NULL;
 FILE *bin_file = NULL;
 FILE *out_file_raw = NULL;
+FILE *out_file_raw_sync = NULL;
 FILE *out_file_pipeline = NULL;
 FILE *out_file_pipeline_pos = NULL;
 
 // local variable
 char tmtc_raw_header[] = "head;gtm module;Packet Counter;year;day;hour;minute;sec;Lastest PPS Counter;Lastest Fine Time Counter Value Between 2 PPS;Board Temperature#1;Board Temperature#2;CITIROC1 Temperature#1;CITIROC1 Temperature#2;CITIROC2 Temperature#1;CITIROC2 Temperature#2;CITIROC1 Live time;CITIROC2 Live time;CITIROC1 Hit Counter#0;CITIROC1 Hit Counter#1;CITIROC1 Hit Counter#2;CITIROC1 Hit Counter#3;CITIROC1 Hit Counter#4;CITIROC1 Hit Counter#5;CITIROC1 Hit Counter#6;CITIROC1 Hit Counter#7;CITIROC1 Hit Counter#8;CITIROC1 Hit Counter#9;CITIROC1 Hit Counter#10;CITIROC1 Hit Counter#11;CITIROC1 Hit Counter#12;CITIROC1 Hit Counter#13;CITIROC1 Hit Counter#14;CITIROC1 Hit Counter#15;CITIROC1 Hit Counter#16;CITIROC1 Hit Counter#17;CITIROC1 Hit Counter#18;CITIROC1 Hit Counter#19;CITIROC1 Hit Counter#20;CITIROC1 Hit Counter#21;CITIROC1 Hit Counter#22;CITIROC1 Hit Counter#23;CITIROC1 Hit Counter#24;CITIROC1 Hit Counter#25;CITIROC1 Hit Counter#26;CITIROC1 Hit Counter#27;CITIROC1 Hit Counter#28;CITIROC1 Hit Counter#29;CITIROC1 Hit Counter#30;CITIROC1 Hit Counter#31;CITIROC2 Hit Counter#0;CITIROC2 Hit Counter#1;CITIROC2 Hit Counter#2;CITIROC2 Hit Counter#3;CITIROC2 Hit Counter#4;CITIROC2 Hit Counter#5;CITIROC2 Hit Counter#6;CITIROC2 Hit Counter#7;CITIROC2 Hit Counter#8;CITIROC2 Hit Counter#9;CITIROC2 Hit Counter#10;CITIROC2 Hit Counter#11;CITIROC2 Hit Counter#12;CITIROC2 Hit Counter#13;CITIROC2 Hit Counter#14;CITIROC2 Hit Counter#15;CITIROC2 Hit Counter#16;CITIROC2 Hit Counter#17;CITIROC2 Hit Counter#18;CITIROC2 Hit Counter#19;CITIROC2 Hit Counter#20;CITIROC2 Hit Counter#21;CITIROC2 Hit Counter#22;CITIROC2 Hit Counter#23;CITIROC2 Hit Counter#24;CITIROC2 Hit Counter#25;CITIROC2 Hit Counter#26;CITIROC2 Hit Counter#27;CITIROC2 Hit Counter#28;CITIROC2 Hit Counter#29;CITIROC2 Hit Counter#30;CITIROC2 Hit Counter#31;CITIROC1 Trigger counter;CITIROC2 Trigger counter;Counter period Setting;HV DAC1;HV DAC2;SPW#A Error count;SPW#B Error count;SPW#A Last Recv Byte;SPW#B Last Recv Byte;SPW#A status;SPW#B status;Recv Checksum of Last CMD;Calc Checksum of Last CMD;Number of Recv CMDs;SEU-Measurement#1;SEU-Measurement#2;SEU-Measurement#3;checksum;tail\n";
+char raw_sync_header[] = "gtm module;PPS counts;CMD-SAD sequence number;UTC day;UTC hour;UTC minute;UTC sec;UTC subsec;x position;y position;z position;x velocity;y velocity;z velocity;S/C Quaternion 1;S/C Quaternion 2;S/C Quaternion 3;S/C Quaternion 4\n";
 
 void log_message(const char *format, ...)
 {
@@ -191,7 +193,7 @@ char *easy_strcat(char *prefix, char *postfix)
 
 void open_all_file(char *input_file_path, char *out_file_path)
 {
-    char *raw_outpath = NULL, *pipeline_outpath = NULL, *pipeline_pos_outpath = NULL;
+    char *raw_outpath = NULL, *raw_pos_outpath = NULL, *pipeline_outpath = NULL, *pipeline_pos_outpath = NULL;
     // input file
     bin_file = fopen(input_file_path, "rb");
     if (!bin_file)
@@ -219,6 +221,15 @@ void open_all_file(char *input_file_path, char *out_file_path)
                     log_error("can't open raw output file");
                 }
                 free(raw_outpath);
+
+                raw_pos_outpath = easy_strcat(out_file_path, "_science_raw_sync.csv");
+                out_file_raw_sync = fopen(raw_pos_outpath, "w");
+                if (!out_file_raw_sync)
+                {
+                    log_error("can't open raw sync output file");
+                }
+                fputs(raw_sync_header, out_file_raw_sync);
+                free(raw_pos_outpath);
             }
             if (export_mode == 1 || export_mode == 2)
             {
@@ -274,6 +285,7 @@ void close_all_file(void)
         if (export_mode == 0 || export_mode == 2)
         {
             fclose(out_file_raw);
+            fclose(out_file_raw_sync);
         }
         if (export_mode == 1 || export_mode == 2)
         {

@@ -23,6 +23,32 @@
 				"isDefault": true
 			},
 			"detail": "compiler: /usr/bin/gcc"
+		},
+		{
+			"type": "cppbuild",
+			"label": "python library build",
+			"command": "/usr/bin/gcc",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-g",
+				"-I/usr/include/python3.9",
+				"-L/usr/lib/python3.9",
+				"-lpython3.9",
+				"py_wrapper.c",
+				"-o",
+				"${fileDirname}/gtm_py_test"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compiler: /usr/bin/gcc"
 		}
 	]
 }
