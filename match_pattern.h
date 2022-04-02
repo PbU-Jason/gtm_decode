@@ -52,6 +52,7 @@ typedef struct Position
 
 typedef struct Event
 {
+    uint8_t if_hit;
     Gtm_module gtm_module;
     uint16_t pps_counter;
     uint8_t cmd_seq_num; // CMD-SAD sequence number

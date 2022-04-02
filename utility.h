@@ -10,6 +10,7 @@ extern int decode_mode;
 extern int export_mode;
 extern int terminal_out;
 extern int debug_output;
+extern int exclude_nohit;
 extern unsigned char *binary_buffer;
 extern FILE *bin_file;
 extern FILE *out_file_raw;

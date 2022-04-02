@@ -243,7 +243,7 @@ static void write_event_buffer(void)
     if (export_mode == 0 || export_mode == 2)
     {
         fprintf(out_file_raw, "event adc: ");
-        fprintf(out_file_raw, "%5u;%10u;%1u;%1u;%3u;%1u;%5u\n", event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id, event_buffer->energy_filter, event_buffer->adc_value);
+        fprintf(out_file_raw, "%1u;%5u;%10u;%1u;%1u;%3u;%1u;%5u\n", event_buffer->if_hit, event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id, event_buffer->energy_filter, event_buffer->adc_value);
     }
     if (export_mode == 1 || export_mode == 2)
     {
@@ -253,14 +253,44 @@ static void write_event_buffer(void)
     }
 }
 
+static void parse_event_adc(unsigned char *target)
+{
+    unsigned char *buffer = NULL;
+
+    event_buffer->if_hit = ((*target & 0x40) == 0x40);
+    event_buffer->gtm_module = (*target & 0x20) ? SLAVE : MASTER;
+    event_buffer->citiroc_id = (*target & 0x10) ? 1 : 0;
+    event_buffer->energy_filter = (*(target + 1) & 0x20) ? 1 : 0;
+
+    buffer = (unsigned char *)malloc(3);
+    if (!buffer)
+    {
+        log_error("can't allocate buffer in parse_event_data()");
+    }
+
+    // read channel id, it's spilt between bytes, maybe worth fixing that?
+    memcpy(buffer, target, 3);
+    left_shift_mem(buffer, 3, 4);
+    buffer[0] = buffer[0] >> 3;
+    memcpy(&(event_buffer->channel_id), buffer, 1);
+
+    // read adc value
+    memcpy(buffer, target + 1, 2);
+    buffer[0] = buffer[0] & 0x3F; // mask channel id and energy filter
+    big2little_endian(buffer, 2);
+    memcpy(&(event_buffer->adc_value), buffer, 2);
+    update_energy_from_adc();
+    free(buffer);
+
+    write_event_buffer();
+    return;
+}
 static void parse_event_data(unsigned char *target)
 {
-    static unsigned char ref_event_time = 0x80;
-    static unsigned char ref_event_adc = 0x40;
     unsigned char *buffer = NULL;
     uint32_t old_fine_counter;
 
-    if ((*target & 0xC0) == ref_event_time)
+    if ((*target & 0xC0) == 0x80)
     { // event time data
         buffer = (unsigned char *)malloc(4);
         if (!buffer)
@@ -282,34 +312,19 @@ static void parse_event_data(unsigned char *target)
         return;
     }
 
-    if ((*target & 0xC0) == ref_event_adc)
-    { // event adc data with 1 hit
-        event_buffer->gtm_module = (*target & 0x20) ? SLAVE : MASTER;
-        event_buffer->citiroc_id = (*target & 0x10) ? 1 : 0;
-        event_buffer->energy_filter = (*(target + 1) & 0x20) ? 1 : 0;
-
-        buffer = (unsigned char *)malloc(3);
-        if (!buffer)
+    if (exclude_nohit)
+    {
+        if ((*target & 0xC0) == 0x40)
         {
-            log_error("can't allocate buffer in parse_event_data()");
+            parse_event_adc(target);
         }
-
-        // read channel id, it's spilt between bytes, maybe worth fixing that?
-        memcpy(buffer, target, 3);
-        left_shift_mem(buffer, 3, 4);
-        buffer[0] = buffer[0] >> 3;
-        memcpy(&(event_buffer->channel_id), buffer, 1);
-
-        // read adc value
-        memcpy(buffer, target + 1, 2);
-        buffer[0] = buffer[0] & 0x3F; // mask channel id and energy filter
-        big2little_endian(buffer, 2);
-        memcpy(&(event_buffer->adc_value), buffer, 2);
-        update_energy_from_adc();
-        free(buffer);
-
-        write_event_buffer();
-        return;
+    }
+    else
+    {
+        if ((*target & 0x80) == 0x00)
+        {
+            parse_event_adc(target);
+        }
     }
 }
 

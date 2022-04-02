@@ -7,7 +7,7 @@ char *output_file_path = NULL;
 char doc[] =
     "GTM decoder -- decode GTM binary file to human readable data";
 char args_doc[] = "use --help flag to see more detail";
-char version_str[] = "20220331\n\0";
+char version_str[] = "20220402\n\0";
 
 static struct argp_option options[] = {
     {"input", 'i', "FILE", 0, "Required!!, The input binary file"},
@@ -17,6 +17,7 @@ static struct argp_option options[] = {
     {"buffer-size", 'b', "Bytes", 0, "The max buffer size while loading the binary file. The defalt size is 1 GB"},
     {"terminal-out", 't', NULL, OPTION_ARG_OPTIONAL, "deocder will ignore output file and dump all the results into terminal"},
     {"silent", 's', NULL, OPTION_ARG_OPTIONAL, "no log and error message"},
+    {"get-nohit-event", 128, NULL, OPTION_ARG_OPTIONAL, "output zero hit event adc, only affect science data(decode mode 0) raw output"},
     {"version", 'v', NULL, OPTION_ARG_OPTIONAL, "show program version"},
     {0}};
 
@@ -54,6 +55,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
     break;
   case 's':
     debug_output = 0;
+    break;
+  case 128:
+    exclude_nohit = 0;
     break;
   case 'v':
     fputs(version_str, stdout);

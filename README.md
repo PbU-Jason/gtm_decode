@@ -1,7 +1,7 @@
 # gtm_decode
 a WIP gtm decoder
 
-README version: 20220331
+README version: 20220402
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -34,6 +34,8 @@ GTM decoder -- decode GTM binary file to human readable data
   -e, --export-mode=Num      the export mode, for deocde mode 0 only. 0 =
                              output raw format, 1 = output pipeline format, 2 =
                              output both, default 0
+      --get-nohit-event      output zero hit event adc, only affect science
+                             data(decode mode 0) raw output
   -i, --input=FILE           Required!!, The input binary file
   -m, --decode-mode=Num      Required!!, the decode mode, 0 = decode science
                              data, 1 = decode telemetry data, 2 = extract
@@ -51,22 +53,29 @@ for any corresponding short options.
 
 ```
 
-Notice that input file, output file and decode mode is required.
+- input file, output file and decode mode is required.
+- `--get-nohit-event` will significantly slow down the program!!
 
 ## Output file
 ### Decode mode 0
-Depends on export mode, there might be prefix_science_raw.txt, prefix_science_pipeline.txt and prefix_science_pipeline_pos.txt
+Depends on export mode, there might be prefix_science_raw.txt, prefix_science_raw_sync.csv, prefix_science_pipeline.txt and prefix_science_pipeline_pos.txt
 #### **prefix_science_raw.txt**
 ```
 sd header: [sequence number]
 sync: [pps count] [cmd sequence number]
 event time: [fine count]
-event adc: [pps count] [fine count] [gtm module] [citiroc id] [channel id] [gain] [adc value]
+event adc: [if hit] [pps count] [fine count] [gtm module] [citiroc id] [channel id] [gain] [adc value]
 ```
 gtm module: 0=master, 1=slave
 citiroc id: 0=a, 1=b
 gain: 0=LG, 1=HG
 
+#### **prefix_science_raw_sync.csv**
+a csv file with header
+```
+gtm module;PPS counts;CMD-SAD sequence number;UTC day;UTC hour;UTC minute;UTC sec;UTC subsec;x position;y position;z position;x velocity;y velocity;z velocity;S/C Quaternion 1;S/C Quaternion 2;S/C Quaternion 3;S/C Quaternion 4
+
+```
 #### **prefix_science_pipeline.txt**
 the first line will contain start time.
 ```

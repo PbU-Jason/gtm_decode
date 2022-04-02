@@ -13,6 +13,7 @@ int decode_mode = 0;
 int export_mode = 0;
 int terminal_out = 0;
 int debug_output = 1;
+int exclude_nohit = 1;
 unsigned char *binary_buffer = NULL;
 FILE *bin_file = NULL;
 FILE *out_file_raw = NULL;
