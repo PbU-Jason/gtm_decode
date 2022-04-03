@@ -197,7 +197,7 @@ static void parse_sync_data(unsigned char *target)
     big2little_endian(buffer, 2);
     memcpy(&(event_buffer->pps_counter), buffer, 2);
     // CMD-SAD sequence number
-    memcpy(&(event_buffer->cmd_seq_num), buffer + 24, 1);
+    memcpy(&(event_buffer->cmd_seq_num), target + 3, 1);
     // UTC
     memcpy(&time_before, time_buffer, sizeof(Time));
     parse_utc_time_sync(target + 4);
