@@ -1,7 +1,7 @@
 # gtm_decode
 a WIP gtm decoder
 
-README version: 20220402
+README version: 20220403
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -35,7 +35,7 @@ GTM decoder -- decode GTM binary file to human readable data
                              output raw format, 1 = output pipeline format, 2 =
                              output both, default 0
       --get-nohit-event      output zero hit event adc, only affect science
-                             data(decode mode 0) raw output
+                             data(decode mode 0)
   -i, --input=FILE           Required!!, The input binary file
   -m, --decode-mode=Num      Required!!, the decode mode, 0 = decode science
                              data, 1 = decode telemetry data, 2 = extract

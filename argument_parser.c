@@ -7,7 +7,7 @@ char *output_file_path = NULL;
 char doc[] =
     "GTM decoder -- decode GTM binary file to human readable data";
 char args_doc[] = "use --help flag to see more detail";
-char version_str[] = "20220402\n\0";
+char version_str[] = "20220403\n\0";
 
 static struct argp_option options[] = {
     {"input", 'i', "FILE", 0, "Required!!, The input binary file"},
