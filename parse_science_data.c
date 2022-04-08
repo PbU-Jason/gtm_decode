@@ -4,8 +4,7 @@
 #include "utility.h"
 #include "match_pattern.h"
 #include "argument_parser.h"
-
-// the code is designed for little endian computers (like x86_64) !!
+#include "crc_check.h"
 
 void parse_science_data(void)
 {
@@ -14,6 +13,7 @@ void parse_science_data(void)
     size_t old_sd_header_location = 0;
     size_t full = 0;
     size_t broken = 0;
+    uint8_t CRC, current_CRC;
 
     event_buffer->pps_counter = INI_PPS_COUNTER;
     event_buffer->fine_counter = INI_FINE_COUNTER;
@@ -80,10 +80,21 @@ void parse_science_data(void)
                     }
                 }
             }
-
+            // parse and check the sequence count
             parse_sd_header(binary_buffer + sd_header_location);
             if (sd_header_location - old_sd_header_location == SCIENCE_DATA_SIZE + SD_HEADER_SIZE)
             { // full packet
+                // check CRC byte
+                /*
+                memcpy(&CRC, binary_buffer + sd_header_location + 2, 1);
+                current_CRC = calc_CRC_8_ATM(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, SCIENCE_DATA_SIZE);
+                if (CRC != current_CRC)
+                {
+                    log_message("location %zu", old_sd_header_location);
+                    log_message("CRC calc %2X", current_CRC);
+                    log_error("wrong CRC");
+                }
+                */
                 parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, SCIENCE_DATA_SIZE);
                 full++;
             }
