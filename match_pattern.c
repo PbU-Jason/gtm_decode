@@ -170,8 +170,8 @@ static void write_sync_data(void)
         if (!got_first_time_info)
         {
             get_month_and_mday();
-            fprintf(out_file_pipeline, "start time UTC,%02i_%02i_%04i_%02i_%02i_%0.6f\n", time_buffer->mday, time_buffer->month, time_buffer->year, time_buffer->hour, time_buffer->minute, calc_sec(time_buffer));
-            fprintf(out_file_pipeline_pos, "start time UTC,%02i_%02i_%04i_%02i_%02i_%0.6f\n", time_buffer->mday, time_buffer->month, time_buffer->year, time_buffer->hour, time_buffer->minute, calc_sec(time_buffer));
+            fprintf(out_file_pipeline, "start time UTC,%02i_%02i_%04i_%02i_%02i_%0.8f\n", time_buffer->mday, time_buffer->month, time_buffer->year, time_buffer->hour, time_buffer->minute, calc_sec(time_buffer));
+            fprintf(out_file_pipeline_pos, "start time UTC,%02i_%02i_%04i_%02i_%02i_%0.8f\n", time_buffer->mday, time_buffer->month, time_buffer->year, time_buffer->hour, time_buffer->minute, calc_sec(time_buffer));
             fprintf(out_file_pipeline, "time;detector;pixel;energy\n");          // header
             fprintf(out_file_pipeline_pos, "time;qw;qx;qy;qz;ECIx;ECIy;ECIz\n"); // header
             memcpy(time_start, time_buffer, sizeof(Time));
@@ -249,7 +249,7 @@ static void write_event_buffer(void)
     {
         detector = ((int)event_buffer->gtm_module + 1) * ((int)event_buffer->citiroc_id + 1) + (int)(event_buffer->channel_id / 16);
         pixel = (int)event_buffer->channel_id % 16 + 1;
-        fprintf(out_file_pipeline, "%0.6f;%i;%i;%f\n", find_time_delta(time_start, time_buffer), detector, pixel, event_buffer->energy);
+        fprintf(out_file_pipeline, "%0.8f;%i;%i;%f\n", find_time_delta(time_start, time_buffer), detector, pixel, event_buffer->energy);
     }
 }
 
