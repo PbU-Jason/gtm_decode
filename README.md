@@ -1,7 +1,7 @@
 # gtm_decode
 a WIP gtm decoder
 
-README version: 20220411
+README version: 20220413
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -55,22 +55,63 @@ for any corresponding short options.
 
 - input file, output file and decode mode is required.
 - `--get-nohit-event` will significantly slow down the program!!
+- buffer size should not be too small, probably larger than 1 MB will be fine.
 
-## warning flag
-during the decoding, there might be warning message.
+## Warning/Error message
+During the decoding, there might be warning/error message. 
+
+- **Message: [some message]**: a normal message
+- **Error: [some message]**: will terminate the program
+
+Here will document the common warning message and error.
+
+### General
+
+- **Error: can't parse [some variable]**
+  some of the command line input is unexpected or missing.
+- **Error: unknown [decode/export] mode**
+  the command line input of decode/export mode is uexpected.
+- **Error: fail to create [some name] buffer**
+  error occur when allocating memory, maybe the memory left isn't enough. You could modified the buffer size.
+- **Error: Your computer use big endian format, which is not supported by the program!!**
+  the CPU architecture is not compatible with this program
+- **Error: binary file not found**
+  the input binary file path is missing or wrong.
 
 
-### decode mode 0
+### Decode mode 0
 
 
-- **Message: Incontiuous occurs around bytes**
+- **Message: Non continuous occurs around bytes**
+  For multiple reason, non continuous packet occurred, it will report the byte location. This warning is triggered by other types of warning, and is used to report the location of those error. Follow is the list of warning that will trigger non continuous warning:
   
-  For multiple reason, incontinuous packet occured, it will report the byte location. This warning is triggered by other types of warning, and is used to report the location of those error.
+  - Wrong CRC
+  - Packet size smaller than expected
+  - Packet size smaller than expected
+- **Message: Binary file doesn't start with science data header**
+  The input binary file doesn't start with science data header, it will report the byte location where the first header occurs. If this value is too big, you might want to inspect the data. 
+- **Message: Can't find next sd header while this isn't the last packet**
+  there's no next science data header even if there's enough space. The binary data after this warning wil be discarded.
 - **Message: Wrong CRC**
-  
-  the CRC byte calculated is different from CRC byte from the next science packet header. It will set incontinuous packet warning, and report CRC value. The location report by the next incontinuous warning is at the start of the packet after the incontinuous one.
-  ![CRC_warning](./readme_assets/CRC_error_illustration.png)
-- 
+  the CRC byte calculated is different from CRC byte from the next science packet header. It will set non continuous packet warning, and report CRC value. The location reported by the next non continuous warning is at the start of the packet after the non continuous one.
+  <img src="./readme_assets/CRC_error_illustration.png" alt="CRC_warning" style="zoom:50%;" />
+- **Message: Packet size smaller than expected**
+  the science data packet length is smaller than expected, it will report the number of bytes smaller and set  non continuous packet warning. The location reported by the next non continuous warning is at the start of the packet after the small packet.
+  <img src="./readme_assets/small_packet_error_illustration.png" alt="CRC_warning" style="zoom:50%;" />
+- **Message: Packet size larger than expected**
+  the science data packet length is larger than expected, it will report the number of bytes larger and set  non continuous packet warning. The location reported by the next non continuous warning is at the start of the packet after the large packet.
+  <img src="./readme_assets/large_packet_error_illustration.png" alt="CRC_warning" style="zoom:50%;" />
+- **Message: sequence count not continuous**
+  the sequence count between current and the next science packet is not continuous. It will report both sequence count and set non continuous packet warning. The location reported by the next non continuous warning is at the middle of 2 packets.
+  <img src="./readme_assets/sequence_count_error_illustration.png" alt="CRC_warning" style="zoom:50%;" />
+- **ERROR: Bin file doesn't start with sd header**
+  this means something wrong happens when loading new chunk of binary buffer, you should inspect the source code and debug.
+
+### Decode mode 1
+
+- **Message: tmtc tail missing!!**
+  No tmtc tail
+
 ## Output file
 ### Decode mode 0
 Depends on export mode, there might be prefix_science_raw.txt, prefix_science_raw_sync.csv, prefix_science_pipeline.txt and prefix_science_pipeline_pos.txt
