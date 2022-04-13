@@ -52,8 +52,8 @@ static void calc_lookup_table_rev(void)
     printf("finish calculating CRC look up table\n");
 }
 
-// return CRC-8-ATM
-uint8_t calc_CRC_8_ATM(unsigned char *target, size_t target_size)
+// return CRC-8-ATM reversed
+uint8_t calc_CRC_8_ATM_rev(unsigned char *target, size_t target_size)
 {
     uint8_t pattern, current_byte;
     size_t i;

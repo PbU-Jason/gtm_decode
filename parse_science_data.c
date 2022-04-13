@@ -87,7 +87,7 @@ void parse_science_data(void)
 
                 // check CRC byte
                 memcpy(&CRC_next_packet, binary_buffer + sd_header_location + 2, 1);
-                CRC_calculate = calc_CRC_8_ATM(binary_buffer + old_sd_header_location, SCIENCE_DATA_SIZE + SD_HEADER_SIZE);
+                CRC_calculate = calc_CRC_8_ATM_rev(binary_buffer + old_sd_header_location, SCIENCE_DATA_SIZE + SD_HEADER_SIZE);
                 if (CRC_next_packet != CRC_calculate)
                 {
                     log_message("Wrong CRC, calculate value: %02X, value from next packet: %02X", CRC_calculate, CRC_next_packet);
