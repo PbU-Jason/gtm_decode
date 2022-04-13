@@ -37,10 +37,6 @@ void extract_science_data(void)
             {
                 memcpy(nspo_data_buffer + nspo_data_buffer_counter, binary_buffer + location, 1);
             }
-            else if (location >= -(NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE))
-            {
-                memcmp(nspo_data_buffer + nspo_data_buffer_counter, pre_binary_buffer + location + NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE, 1);
-            }
             else
             {
                 log_error("try to access outside pre_binary_buffer boundary");
@@ -51,8 +47,9 @@ void extract_science_data(void)
             {
                 if (!is_nspo_header(nspo_data_buffer))
                 { // is not nspo header
-                    nspo_data_buffer_counter = 0;
-                    location -= NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE - 1;
+                    nspo_data_buffer_counter--;
+                    // discard the first byte in the buffer
+                    memcmp(nspo_data_buffer, nspo_data_buffer + 1, NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE - 1);
                 }
             }
             if (nspo_data_buffer_counter == NSPO_DATA_SIZE)
