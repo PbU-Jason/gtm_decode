@@ -56,6 +56,21 @@ for any corresponding short options.
 - input file, output file and decode mode is required.
 - `--get-nohit-event` will significantly slow down the program!!
 
+## warning flag
+during the decoding, there might be warning message.
+
+
+### decode mode 0
+
+
+- **Message: Incontiuous occurs around bytes**
+  
+  For multiple reason, incontinuous packet occured, it will report the byte location. This warning is triggered by other types of warning, and is used to report the location of those error.
+- **Message: Wrong CRC**
+  
+  the CRC byte calculated is different from CRC byte from the next science packet header. It will set incontinuous packet warning, and report CRC value. The location report by the next incontinuous warning is at the start of the packet after the incontinuous one.
+  ![CRC_warning](./readme_assets/CRC_error_illustration.png)
+- 
 ## Output file
 ### Decode mode 0
 Depends on export mode, there might be prefix_science_raw.txt, prefix_science_raw_sync.csv, prefix_science_pipeline.txt and prefix_science_pipeline_pos.txt
