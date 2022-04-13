@@ -255,18 +255,12 @@ static void write_event_buffer(void)
 
 static void parse_event_adc(unsigned char *target)
 {
-    unsigned char *buffer = NULL;
+    unsigned char buffer[3] = {0x00, 0x00, 0x00};
 
     event_buffer->if_hit = ((*target & 0x40) == 0x40);
     event_buffer->gtm_module = (*target & 0x20) ? SLAVE : MASTER;
     event_buffer->citiroc_id = (*target & 0x10) ? 1 : 0;
     event_buffer->energy_filter = (*(target + 1) & 0x20) ? 1 : 0;
-
-    buffer = (unsigned char *)malloc(3);
-    if (!buffer)
-    {
-        log_error("can't allocate buffer in parse_event_data()");
-    }
 
     // read channel id, it's spilt between bytes, maybe worth fixing that?
     memcpy(buffer, target, 3);
@@ -280,35 +274,24 @@ static void parse_event_adc(unsigned char *target)
     big2little_endian(buffer, 2);
     memcpy(&(event_buffer->adc_value), buffer, 2);
     update_energy_from_adc();
-    free(buffer);
 
     write_event_buffer();
     return;
 }
 static void parse_event_data(unsigned char *target)
 {
-    unsigned char *buffer = NULL;
-    uint32_t old_fine_counter;
+    unsigned char buffer[4] = {0x00, 0x00, 0x00, 0x00};
 
     if ((*target & 0xC0) == 0x80)
     { // event time data
-        buffer = (unsigned char *)malloc(4);
-        if (!buffer)
-        {
-            log_error("can't allocate buffer in parse_event_data()");
-        }
-
-        buffer[0] = 0x00;
         memcpy(&buffer[1], target, 3);
         buffer[1] = buffer[1] & 0x3F; // mask the header
         big2little_endian(buffer, 4);
-        old_fine_counter = event_buffer->fine_counter;
+
         memcpy(&(event_buffer->fine_counter), buffer, 4);
-        memcpy(&(time_buffer->fine_counter), buffer, 2);
-        free(buffer);
+        memcpy(&(time_buffer->fine_counter), buffer, 4);
 
         write_event_time();
-        // log_message("update event time");
         return;
     }
 
@@ -447,7 +430,6 @@ void write_tmtc_buffer(void)
 void parse_tmtc_packet(unsigned char *target)
 {
     int i;
-    unsigned char temp2[2], temp3[3];
 
     // header
     memcpy(tmtc_buffer->head, target, 2);

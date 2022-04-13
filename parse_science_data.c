@@ -40,7 +40,7 @@ void parse_science_data(void)
         }
         if (!is_sd_header(binary_buffer))
         {
-            log_error("bin file doesn't start with sd header");
+            log_error("Bin file doesn't start with sd header");
         }
         // loop through packet in buffer
         while (sd_header_location < actual_binary_buffer_size)
