@@ -60,8 +60,12 @@ for any corresponding short options.
 ## Warning/Error message
 During the decoding, there might be warning/error message. 
 
-- **Message: [some message]**: a normal message
-- **Error: [some message]**: will terminate the program
+- **Message: [some message]**
+  
+  a normal message
+- **Error: [some message]**
+  
+  will terminate the program
 
 Here will document the common warning message and error.
 
@@ -94,6 +98,7 @@ Here will document the common warning message and error.
   - Wrong CRC
   - Packet size smaller than expected
   - Packet size smaller than expected
+  - sequence count not continuous
 - **Message: Binary file doesn't start with science data header**
 
   The input binary file doesn't start with science data header, it will report the byte location where the first header occurs. If this value is too big, you might want to inspect the data. 
