@@ -13,7 +13,7 @@ void parse_science_data(void)
     size_t old_sd_header_location = 0;
     size_t full = 0;
     size_t broken = 0;
-    uint8_t CRC, current_CRC;
+    uint8_t CRC_next_packet, CRC_calculate;
 
     event_buffer->pps_counter = INI_PPS_COUNTER;
     event_buffer->fine_counter = INI_FINE_COUNTER;
@@ -23,7 +23,7 @@ void parse_science_data(void)
     sd_header_location = find_next_sd_header(binary_buffer, -SD_HEADER_SIZE, actual_binary_buffer_size);
     if (sd_header_location != 0)
     {
-        log_message("Binary file doesn't start with science data header, first science data header is at byte %zu", sd_header_location);
+        log_message("Binary file doesn't start with science data header, first science data header is at byte %zu", (size_t)ftell(bin_file) - actual_binary_buffer_size + sd_header_location);
         fseek(bin_file, sd_header_location - actual_binary_buffer_size, SEEK_CUR);
         actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
     }
@@ -48,7 +48,7 @@ void parse_science_data(void)
             // if the packet is not continueous, reset related parameter
             if (!continuous_packet)
             {
-                log_message("above uncontiuous occurs around bytes %zu", (size_t)ftell(bin_file) - actual_binary_buffer_size + sd_header_location);
+                log_message("Non contiuous occurs around bytes %zu", (size_t)ftell(bin_file) - actual_binary_buffer_size + sd_header_location);
                 got_first_sync_data = 0;
             }
 
@@ -68,7 +68,7 @@ void parse_science_data(void)
                     // it's the last buffer but can't find next packet
                     if (old_sd_header_location + SD_HEADER_SIZE + SCIENCE_DATA_SIZE < actual_binary_buffer_size)
                     {
-                        log_message("can't find next sd header while this isn't the last packet, discard data after");
+                        log_message("Can't find next sd header while this isn't the last packet, discard data after");
                         break;
                     }
                     // it's the last buffer and this is the last packet
@@ -84,17 +84,16 @@ void parse_science_data(void)
             parse_sd_header(binary_buffer + sd_header_location);
             if (sd_header_location - old_sd_header_location == SCIENCE_DATA_SIZE + SD_HEADER_SIZE)
             { // full packet
+
                 // check CRC byte
-                /*
-                memcpy(&CRC, binary_buffer + sd_header_location + 2, 1);
-                current_CRC = calc_CRC_8_ATM(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, SCIENCE_DATA_SIZE);
-                if (CRC != current_CRC)
+                memcpy(&CRC_next_packet, binary_buffer + sd_header_location + 2, 1);
+                CRC_calculate = calc_CRC_8_ATM(binary_buffer + old_sd_header_location, SCIENCE_DATA_SIZE + SD_HEADER_SIZE);
+                if (CRC_next_packet != CRC_calculate)
                 {
-                    log_message("location %zu", old_sd_header_location);
-                    log_message("CRC calc %2X", current_CRC);
-                    log_error("wrong CRC");
+                    log_message("Wrong CRC, calculate value: %02X, value from next packet: %02X", CRC_calculate, CRC_next_packet);
+                    continuous_packet = 0;
                 }
-                */
+
                 parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, SCIENCE_DATA_SIZE);
                 full++;
             }
@@ -103,13 +102,13 @@ void parse_science_data(void)
                 // packet smaller than expected
                 if (sd_header_location - old_sd_header_location < SCIENCE_DATA_SIZE + SD_HEADER_SIZE)
                 {
-                    log_message("packet size %zu bytes smaller than expected", sd_header_location - old_sd_header_location);
+                    log_message("Packet size %zu bytes smaller than expected", sd_header_location - old_sd_header_location);
                     parse_science_packet(binary_buffer + old_sd_header_location + SD_HEADER_SIZE, sd_header_location - old_sd_header_location - SD_HEADER_SIZE);
                 }
                 // if packet larger than expected, don't parse the packet
                 else
                 {
-                    log_message("packet size %zu bytes larger than expected", sd_header_location - old_sd_header_location);
+                    log_message("Packet size %zu bytes larger than expected", sd_header_location - old_sd_header_location);
                 }
                 continuous_packet = 0;
                 broken++;
