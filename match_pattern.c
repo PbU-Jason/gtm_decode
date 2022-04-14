@@ -208,7 +208,7 @@ static void parse_sync_data(unsigned char *target)
     time_buffer->pps_counter++;
     time_buffer->fine_counter = 0;
     // if UTC update, reset out own pps
-    if (!memcmp(&time_before, time_buffer, 80)) // only compare the UTC part
+    if (!memcmp(&time_before, time_buffer, 10)) // only compare the UTC part
     {
         time_buffer->pps_counter = 0;
     }

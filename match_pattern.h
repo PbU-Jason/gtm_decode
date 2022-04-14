@@ -24,6 +24,7 @@ typedef enum GTM_module
 
 typedef struct Time
 {
+    // from UTC
     uint16_t year;
     uint8_t month;
     uint8_t mday; // this is the day in the month
@@ -31,7 +32,9 @@ typedef struct Time
     uint8_t hour;
     uint8_t minute;
     uint8_t sec;
-    uint8_t sub_sec;       // msec
+    uint8_t sub_sec; // msec
+
+    // from sync and event time
     uint32_t pps_counter;  // it's our own pps counter
     uint32_t fine_counter; // 0.24 usec
 } Time;

@@ -27,6 +27,29 @@
 		},
 		{
 			"type": "cppbuild",
+			"label": "final build",
+			"command": "/usr/bin/gcc",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-O3",
+				"*.c",
+				"-o",
+				"${fileDirname}/gtm_decoder"
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compiler: /usr/bin/gcc"
+		},
+		{
+			"type": "cppbuild",
 			"label": "python library build",
 			"command": "/usr/bin/gcc",
 			"args": [
