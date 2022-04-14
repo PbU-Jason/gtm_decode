@@ -349,3 +349,18 @@ void get_month_and_mday(void)
     time_buffer->month = (uint8_t)time_new->tm_mon;
     time_buffer->mday = (uint8_t)time_new->tm_mday;
 }
+
+// pop the bytes at the start
+void pop_bytes(unsigned char *target, size_t pop_size, size_t total_size)
+{
+    size_t i;
+
+    if (pop_size >= total_size)
+    {
+        log_error("invalid pop size");
+    }
+    for (i = 0; i < total_size - pop_size; ++i)
+    {
+        memcpy(target + i, target + i + pop_size, 1);
+    }
+}

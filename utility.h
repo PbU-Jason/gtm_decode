@@ -31,4 +31,6 @@ void close_all_file(void);
 double calc_sec(Time *time);
 double find_time_delta(Time *start, Time *end);
 void get_month_and_mday(void);
+void pop_bytes(unsigned char *target, size_t pop_size, size_t total_size)
+
 #endif

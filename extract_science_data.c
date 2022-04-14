@@ -49,7 +49,7 @@ void extract_science_data(void)
                 { // is not nspo header
                     nspo_data_buffer_counter--;
                     // discard the first byte in the buffer
-                    memcpy(nspo_data_buffer, nspo_data_buffer + 1, NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE - 1);
+                    pop_bytes(nspo_data_buffer, 1, NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE);
                 }
             }
             if (nspo_data_buffer_counter == NSPO_DATA_SIZE)
