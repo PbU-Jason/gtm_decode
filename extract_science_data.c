@@ -47,6 +47,7 @@ void extract_science_data(void)
             {
                 if (!is_nspo_header(nspo_data_buffer))
                 { // is not nspo header
+                    log_message("Not NSPO header");
                     nspo_data_buffer_counter--;
                     // discard the first byte in the buffer
                     pop_bytes(nspo_data_buffer, 1, NSPO_EPOCH_HEADER_SIZE + NSPO_SYNC_MARKER_SIZE);
