@@ -35,7 +35,8 @@ typedef struct Time
     uint8_t sub_sec; // msec
 
     // from sync and event time
-    uint32_t pps_counter;  // it's our own pps counter
+    uint32_t pps_counter; // it's our own pps counter
+    uint32_t pps_counter_base;
     uint32_t fine_counter; // 0.24 usec
 } Time;
 

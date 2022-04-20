@@ -193,7 +193,7 @@ static void parse_sync_data(unsigned char *target)
 
     // pps count
     memcpy(buffer, target + 1, 2);
-    buffer[0] = buffer[0] & 0x3F; // mask header and gtm module
+    buffer[0] = buffer[0] & 0x7F; // mask gtm module
     big2little_endian(buffer, 2);
     memcpy(&(event_buffer->pps_counter), buffer, 2);
     // CMD-SAD sequence number
@@ -208,9 +208,12 @@ static void parse_sync_data(unsigned char *target)
     time_buffer->pps_counter++;
     time_buffer->fine_counter = 0;
     // if UTC update, reset out own pps
-    if (!memcmp(&time_before, time_buffer, 10)) // only compare the UTC part
+    if (!compare_UTC(&time_before, time_buffer))
     {
-        time_buffer->pps_counter = 0;
+        // printf("%5u;%3u;%3u;%5u;%3u;%3u;%3u;%3u\n", time_before.year, time_before.month, time_before.mday, time_before.day, time_before.hour, time_before.minute, time_before.sec, time_before.sub_sec);
+        // printf("%5u;%3u;%3u;%5u;%3u;%3u;%3u;%3u\n", time_buffer->year, time_buffer->month, time_buffer->mday, time_buffer->day, time_buffer->hour, time_buffer->minute, time_buffer->sec, time_buffer->sub_sec);
+        // printf("\n");
+        time_buffer->pps_counter_base = time_buffer->pps_counter;
     }
 
     write_sync_data();
@@ -289,6 +292,11 @@ static void parse_event_data(unsigned char *target)
         big2little_endian(buffer, 4);
 
         memcpy(&(event_buffer->fine_counter), buffer, 4);
+        if (event_buffer->fine_counter < time_buffer->fine_counter)
+        {
+            log_message("Fine counter reset, old = %8u, new = %8u", time_buffer->fine_counter, event_buffer->fine_counter);
+            // continuous_packet = 0;
+        }
         memcpy(&(time_buffer->fine_counter), buffer, 4);
 
         write_event_time();

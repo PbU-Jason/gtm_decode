@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
+#include <math.h>
 #include "utility.h"
 #include "match_pattern.h"
 
@@ -310,7 +311,15 @@ void close_all_file(void)
 double calc_sec(Time *time)
 {
     double total_sec;
-    total_sec = (double)time->sec + ((double)time->sub_sec) * 0.001 + (double)time->pps_counter + ((double)time->fine_counter) * 0.24 * 0.000001;
+
+    total_sec = (double)time->sec + ((double)time->sub_sec) * 0.001 + (double)(time->pps_counter - time->pps_counter_base) + ((double)time->fine_counter) * 0.24 * 0.000001;
+
+    // deal with pps counter reset
+    if (time->pps_counter_base > time->pps_counter)
+    {
+        total_sec += pow(2, 15);
+    }
+
     return total_sec;
 }
 
@@ -363,4 +372,9 @@ void pop_bytes(unsigned char *target, size_t pop_size, size_t total_size)
     {
         memcpy(target + i, target + i + pop_size, 1);
     }
+}
+
+int compare_UTC(Time *time1, Time *time2)
+{
+    return (time1->year == time2->year && time1->month == time2->month && time1->mday == time2->mday && time1->day == time2->day && time1->hour == time2->hour && time1->minute == time2->minute && time1->sec == time2->sec && time1->sub_sec == time2->sub_sec);
 }
