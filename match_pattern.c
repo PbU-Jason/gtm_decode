@@ -288,7 +288,7 @@ static void parse_event_data(unsigned char *target)
     if ((*target & 0xC0) == 0x80)
     { // event time data
         memcpy(&buffer[1], target, 3);
-        buffer[1] = buffer[1] & 0x3F; // mask the header
+        buffer[1] = buffer[1] & 0x03; // mask the header
         big2little_endian(buffer, 4);
 
         memcpy(&(event_buffer->fine_counter), buffer, 4);
