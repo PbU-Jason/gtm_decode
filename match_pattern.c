@@ -236,7 +236,7 @@ static void write_event_time(void)
 {
     if (export_mode == 0 || export_mode == 2)
     {
-        fprintf(out_file_raw, "event time: %10u\n", event_buffer->fine_counter);
+        fprintf(out_file_raw, "event time: %10u;%3u\n", event_buffer->fine_counter, event_buffer->event_time_buffer_id);
     }
 }
 
@@ -286,7 +286,15 @@ static void parse_event_data(unsigned char *target)
     unsigned char buffer[4] = {0x00, 0x00, 0x00, 0x00};
 
     if ((*target & 0xC0) == 0x80)
-    { // event time data
+    {
+        // event time debug info
+        memcpy(&buffer[0], target, 1);
+        buffer[0] = buffer[0] >> 2;
+        buffer[0] = buffer[0] & 0x0F;
+        memcpy(&(event_buffer->event_time_buffer_id), &buffer[0], 1);
+
+        buffer[0] = 0x00; // reset
+        // event time data
         memcpy(&buffer[1], target, 3);
         buffer[1] = buffer[1] & 0x03; // mask the header
         big2little_endian(buffer, 4);
