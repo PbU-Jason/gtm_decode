@@ -1,7 +1,7 @@
 # gtm_decode
 a WIP gtm decoder
 
-README version: 20220413
+README version: 20220428
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -131,6 +131,10 @@ Here will document the common warning message and error.
 
   No tmtc tail
 
+### Decode mode 2
+- **Message: Not NSPO header**
+  
+  NSPO header does not appear in location they should appear, that means the NSPO packet might be defected.
 ## Output file
 ### Decode mode 0
 Depends on export mode, there might be prefix_science_raw.txt, prefix_science_raw_sync.csv, prefix_science_pipeline.txt and prefix_science_pipeline_pos.txt
