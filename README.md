@@ -1,7 +1,7 @@
 # gtm_decode
 a WIP gtm decoder
 
-README version: 20220428
+README version: 20220511
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -120,6 +120,7 @@ Here will document the common warning message and error.
 - **Message: sequence count not continuous**
 
   the sequence count between current and the next science packet is not continuous. It will report both sequence count and set non continuous packet warning. The location reported by the next non continuous warning is at the middle of 2 packets.
+
   <img src="./readme_assets/sequence_count_error_illustration.png" alt="CRC_warning" style="zoom:50%;" />
 - **ERROR: Bin file doesn't start with sd header**
 
@@ -164,8 +165,9 @@ where sec is a floating point number.
 
 then there will be a csv table in format:
 ```
-time;detector;pixel;energy
+time;detector;pixel;energy;detector_name
 ```
+**note that currently detector name is not implemented!!**
 
 where:
 
@@ -187,7 +189,7 @@ where:
 
 - pixel: equals (`channel id % 16 + 1`)
 - energy: in keV
-
+- detector_name: the name of detector
 #### **prefix_science_pipeline_pos.txt**
 the first line will contain start time.
 ```
