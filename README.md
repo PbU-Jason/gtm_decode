@@ -167,7 +167,6 @@ then there will be a csv table in format:
 ```
 time;detector;channel id;energy
 ```
-**note that currently detector name is not implemented!!**
 
 where:
 
