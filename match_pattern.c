@@ -242,7 +242,8 @@ static void write_event_time(void)
 
 static void write_event_buffer(void)
 {
-    int detector, pixel;
+    static char detector_name[2][2][2][3] = {{{"PN\0", "PB\0"}, {"PT\0", "PP\0"}}, {{"NP\0", "NB\0"}, {"NT\0", "NN\0"}}};
+
     if (export_mode == 0 || export_mode == 2)
     {
         fprintf(out_file_raw, "event adc: ");
@@ -250,9 +251,7 @@ static void write_event_buffer(void)
     }
     if (export_mode == 1 || export_mode == 2)
     {
-        detector = ((int)event_buffer->gtm_module + 1) * ((int)event_buffer->citiroc_id + 1) + (int)(event_buffer->channel_id / 16);
-        pixel = (int)event_buffer->channel_id % 16 + 1;
-        fprintf(out_file_pipeline, "%0.8f;%i;%i;%f\n", find_time_delta(time_start, time_buffer), detector, pixel, event_buffer->energy);
+        fprintf(out_file_pipeline, "%0.8f;%s;%i;%f\n", find_time_delta(time_start, time_buffer), detector_name[event_buffer->gtm_module][event_buffer->citiroc_id][(int)(event_buffer->channel_id / 16)], event_buffer->channel_id, event_buffer->energy);
     }
 }
 
@@ -286,7 +285,8 @@ static void parse_event_data(unsigned char *target)
     unsigned char buffer[4] = {0x00, 0x00, 0x00, 0x00};
 
     if ((*target & 0xC0) == 0x80)
-    { // event time data
+    {
+        // event time data
         memcpy(&buffer[1], target, 3);
         buffer[1] = buffer[1] & 0x3F; // mask the header
         big2little_endian(buffer, 4);

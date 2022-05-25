@@ -1,7 +1,7 @@
 # gtm_decode
 a WIP gtm decoder
 
-README version: 20220511
+README version: 20220525
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -165,7 +165,7 @@ where sec is a floating point number.
 
 then there will be a csv table in format:
 ```
-time;detector;pixel;energy;detector_name
+time;detector;channel id;energy
 ```
 **note that currently detector name is not implemented!!**
 
@@ -176,18 +176,18 @@ where:
 - detector: based on gtm module, citiroc id, and channel id.
 
 
-  | detector id | GTM module | citiroc id | channel |
-  | ----------- | ---------- | ---------- | ------- |
-  | 1           | master     | 0 (A)      | 0 – 15  |
-  | 2           | master     | 0 (A)      | 16 – 31 |
-  | 3           | master     | 1 (B)      | 0 – 15  |
-  | 4           | master     | 1 (B)      | 16 – 31 |
-  | 5           | slave      | 0 (A)      | 0 – 15  |
-  | 6           | slave      | 0 (A)      | 16 – 31 |
-  | 7           | slave      | 1 (B)      | 0 – 15  |
-  | 8           | slave      | 1 (B)      | 16 – 31 |
+| detector | GTM module | citiroc id | channel |
+| -------- | ---------- | ---------- | ------- |
+| PN       | master     | 0 (A)      | 0 – 15  |
+| PB       | master     | 0 (A)      | 16 – 31 |
+| PT       | master     | 1 (B)      | 0 – 15  |
+| PP       | master     | 1 (B)      | 16 – 31 |
+| NP       | slave      | 0 (A)      | 0 – 15  |
+| NB       | slave      | 0 (A)      | 16 – 31 |
+| NT       | slave      | 1 (B)      | 0 – 15  |
+| NN       | slave      | 1 (B)      | 16 – 31 |
 
-- pixel: equals (`channel id % 16 + 1`)
+- channel id: is related to pixel position.
 - energy: in keV
 - detector_name: the name of detector
 #### **prefix_science_pipeline_pos.txt**
