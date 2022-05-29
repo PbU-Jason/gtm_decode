@@ -344,7 +344,7 @@ void get_month_and_mday(void)
     time_old.tm_hour = 0;
     time_old.tm_mday = (int)time_buffer->day;
     time_old.tm_mon = 1;
-    time_old.tm_year = (int)time_buffer->year;
+    time_old.tm_year = (int)time_buffer->year - 1900; // tm struct start from 1900
     time_old.tm_wday = 0;
     time_old.tm_yday = 0;
     time_old.tm_isdst = 0;

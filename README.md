@@ -120,6 +120,7 @@ Here will document the common warning message and error.
 - **Message: sequence count not continuous**
 
   the sequence count between current and the next science packet is not continuous. It will report both sequence count and set non continuous packet warning. The location reported by the next non continuous warning is at the middle of 2 packets.
+
   <img src="./readme_assets/sequence_count_error_illustration.png" alt="CRC_warning" style="zoom:50%;" />
 - **ERROR: Bin file doesn't start with sd header**
 
@@ -131,6 +132,10 @@ Here will document the common warning message and error.
 
   No tmtc tail
 
+### Decode mode 2
+- **Message: Not NSPO header**
+  
+  NSPO header does not appear in location they should appear, that means the NSPO packet might be defected.
 ## Output file
 ### Decode mode 0
 Depends on export mode, there might be prefix_science_raw.txt, prefix_science_raw_sync.csv, prefix_science_pipeline.txt and prefix_science_pipeline_pos.txt
@@ -183,7 +188,7 @@ where:
 
 - channel id: is related to pixel position.
 - energy: in keV
-
+- detector_name: the name of detector
 #### **prefix_science_pipeline_pos.txt**
 the first line will contain start time.
 ```
