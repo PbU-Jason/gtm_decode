@@ -303,7 +303,7 @@ static void parse_event_data(unsigned char *target)
         if (event_buffer->fine_counter < time_buffer->fine_counter)
         {
             log_message("Fine counter reset, old = %8u, new = %8u", time_buffer->fine_counter, event_buffer->fine_counter);
-            // continuous_packet = 0;
+            got_first_sync_data = 0;
         }
         memcpy(&(time_buffer->fine_counter), buffer, 4);
 
