@@ -77,6 +77,8 @@ void parse_position(unsigned char *target)
     memcpy(&(position_buffer->quaternion4), target + 30, 2);
 }
 
+/*
+// old one
 // chech epoch + sync marker
 int is_nspo_header(unsigned char *target)
 {
@@ -84,6 +86,14 @@ int is_nspo_header(unsigned char *target)
     static unsigned char sync_mark_ref[4] = {0x1A, 0xCF, 0xFC, 0x1D};
 
     return ((!memcmp(target, epoch_ref, 6)) && (!memcmp(target + 10, sync_mark_ref, 4)));
+}
+*/
+
+int is_nspo_header(unsigned char *target)
+{
+    static unsigned char ref[NSPO_HEADER_SIZE] = {0xFE, 0x01, 0x60, 0x00, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x56, 0x17};
+
+    return (!memcmp(target, ref, NSPO_HEADER_SIZE));
 }
 
 // since sd header's head has some prob in current test data, reduce some matching pattern

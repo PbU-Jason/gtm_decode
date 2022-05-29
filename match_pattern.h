@@ -1,11 +1,9 @@
 #ifndef BIT_SHIFT_H
 #define BIT_SHIFT_H
 
-#define NSPO_DATA_SIZE 1129
-#define NSPO_EPOCH_HEADER_SIZE 10
-#define NSPO_SYNC_MARKER_SIZE 4
-#define NSPO_FRAME_HEADER_SIZE 6
-#define NSPO_TRAILER_SIZE 4
+#define NSPO_DATA_SIZE 1127 // total size of a NSPO packet
+#define NSPO_HEADER_SIZE 16 // spacewire RMAP HEAD + CRC
+#define NSPO_TAIL_SIZE 1    // data CRC8 value, EOP control character is not included
 #define SCIENCE_DATA_SIZE 1104
 #define SD_HEADER_SIZE 6
 #define SYNC_DATA_SIZE 45
