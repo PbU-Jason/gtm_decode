@@ -63,7 +63,7 @@ typedef struct Event
     uint8_t citiroc_id;
     uint8_t channel_id;
     uint8_t energy_filter;
-    uint16_t adc_value;
+    int16_t adc_value;
     double energy;
 } Event;
 

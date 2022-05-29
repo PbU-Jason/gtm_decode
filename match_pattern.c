@@ -229,19 +229,6 @@ static void parse_sync_data(unsigned char *target)
     write_sync_data();
 }
 
-static void print_event_buffer(void)
-{
-    printf("-----current event-----\n");
-    printf("gtm module = %i\n", event_buffer->gtm_module);
-    printf("pps counter = %u\n", event_buffer->pps_counter);
-    printf("fine counter = %u\n", event_buffer->fine_counter);
-    printf("citiroc id = %u\n", event_buffer->citiroc_id);
-    printf("channel id = %u\n", event_buffer->channel_id);
-    printf("energy filter = %u\n", event_buffer->energy_filter);
-    printf("adc value = %u\n", event_buffer->adc_value);
-    printf("------------------------\n");
-}
-
 static void write_event_time(void)
 {
     if (export_mode == 0 || export_mode == 2)
@@ -257,7 +244,7 @@ static void write_event_buffer(void)
     if (export_mode == 0 || export_mode == 2)
     {
         fprintf(out_file_raw, "event adc: ");
-        fprintf(out_file_raw, "%1u;%5u;%10u;%1u;%1u;%3u;%1u;%5u\n", event_buffer->if_hit, event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id, event_buffer->energy_filter, event_buffer->adc_value);
+        fprintf(out_file_raw, "%1u;%5u;%10u;%1u;%1u;%3u;%1u;%5i\n", event_buffer->if_hit, event_buffer->pps_counter, event_buffer->fine_counter, event_buffer->gtm_module, event_buffer->citiroc_id, event_buffer->channel_id, event_buffer->energy_filter, event_buffer->adc_value);
     }
     if (export_mode == 1 || export_mode == 2)
     {
@@ -283,7 +270,11 @@ static void parse_event_adc(unsigned char *target)
     // read adc value
     memcpy(buffer, target + 1, 2);
     buffer[0] = buffer[0] & 0x3F; // mask channel id and energy filter
-    big2little_endian(buffer, 2);
+    // if sign bit = 1, deal with 2's complement stuff
+    if (buffer[0] & 0x20)
+    {
+        buffer[0] = buffer[0] | 0xE0;
+    }
     memcpy(&(event_buffer->adc_value), buffer, 2);
     update_energy_from_adc();
 

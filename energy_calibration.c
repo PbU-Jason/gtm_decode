@@ -4,5 +4,5 @@
 void update_energy_from_adc(void)
 {
     // no calibration for now
-    event_buffer->energy = event_buffer->adc_value;
+    event_buffer->energy = (double)event_buffer->adc_value;
 }
