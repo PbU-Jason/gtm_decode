@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/ian/Documents/code/gtm/gtm_decode'
+make: Leaving directory '/home/ian/Documents/code/gtm/gtm_decode'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+
