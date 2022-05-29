@@ -143,7 +143,7 @@ Depends on export mode, there might be prefix_science_raw.txt, prefix_science_ra
 ```
 sd header: [sequence number]
 sync: [pps count] [cmd sequence number]
-event time: [fine count]
+event time: [fine count] [event_time_buffer_id]
 event adc: [if hit] [pps count] [fine count] [gtm module] [citiroc id] [channel id] [gain] [adc value]
 ```
 gtm module: 0=master, 1=slave
