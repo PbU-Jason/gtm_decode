@@ -30,7 +30,6 @@ static void calc_lookup_table_rev(void)
     uint8_t i,
         shift, current_byte, next_byte;
 
-    printf("start calculating CRC look up table\n");
     for (i = 0; i < 256; ++i)
     {
         next_byte = 0x00;
@@ -49,7 +48,6 @@ static void calc_lookup_table_rev(void)
             break;
         }
     }
-    printf("finish calculating CRC look up table\n");
 }
 
 // return CRC-8-ATM reversed
