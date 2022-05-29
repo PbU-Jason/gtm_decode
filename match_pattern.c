@@ -261,7 +261,7 @@ static void parse_event_adc(unsigned char *target)
     event_buffer->citiroc_id = (*target & 0x10) ? 1 : 0;
     event_buffer->energy_filter = (*(target + 1) & 0x20) ? 1 : 0;
 
-    // read channel id, it's spilt between bytes, maybe worth fixing that?
+    // read channel id, it's spilt between bytes
     memcpy(buffer, target, 3);
     left_shift_mem(buffer, 3, 4);
     buffer[0] = buffer[0] >> 3;
@@ -275,6 +275,7 @@ static void parse_event_adc(unsigned char *target)
     {
         buffer[0] = buffer[0] | 0xE0;
     }
+    big2little_endian(buffer, 2);
     memcpy(&(event_buffer->adc_value), buffer, 2);
     update_energy_from_adc();
 
