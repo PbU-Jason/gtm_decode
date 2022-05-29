@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed May 25 21:57:49 2022
+# Make data base, printed on Sun May 29 16:50:23 2022
 
 # Variables
 
@@ -23,15 +23,13 @@ SSH_AGENT_LAUNCHER = gnome-keyring
 # environment
 GJS_DEBUG_OUTPUT = stderr
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-ad324c5b-efe5-4223-a6df-7b843b3c6d50.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-de3a5e58-e769-4550-87ca-9dec7ca14249.sock
 # environment
 LC_NAME = en_US.UTF-8
 # environment
 LC_NUMERIC = en_US.UTF-8
 # environment
 VSCODE_CWD = /home/ian
-# environment
-WINDOWPATH = 2
 # environment
 LC_ADDRESS = en_US.UTF-8
 # environment
@@ -51,7 +49,7 @@ PWD = /home/ian/Documents/code/gtm/gtm_decode
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
-XDG_DATA_DIRS = /usr/share/ubuntu-xorg:/usr/share/gnome:/usr/share/ubuntu:/home/ian/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
+XDG_DATA_DIRS = /usr/share/ubuntu:/home/ian/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # environment
@@ -63,7 +61,7 @@ VSCODE_CODE_CACHE_PATH = /home/ian/.config/Code/CachedData/c3511e6c69bb39013c4a4
 # environment
 LANG = C
 # environment
-XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.3I2DM1
+XAUTHORITY = /run/user/1000/.mutter-Xwaylandauth.MLZEN1
 # default
 .LOADED := 
 # default
@@ -89,7 +87,7 @@ SSH_AUTH_SOCK = /run/user/1000/keyring/ssh
 # environment
 WAYLAND_DISPLAY = wayland-0
 # environment
-XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu-xorg:/etc/xdg/xdg-ubuntu:/etc/xdg
+XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
@@ -101,13 +99,13 @@ MAKEFILE_LIST :=
 # environment
 VSCODE_VERBOSE_LOGGING = true
 # environment
-VSCODE_PID = 82402
+VSCODE_PID = 17190
 # environment
 XDG_SESSION_TYPE = wayland
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
-SESSION_MANAGER = local/ian-IdeaPad:@/tmp/.ICE-unix/52940,unix/ian-IdeaPad:/tmp/.ICE-unix/52940
+SESSION_MANAGER = local/ian-IdeaPad:@/tmp/.ICE-unix/1846,unix/ian-IdeaPad:/tmp/.ICE-unix/1846
 # automatic
 *F = $(notdir $*)
 # environment
@@ -147,7 +145,7 @@ LC_MONETARY = en_US.UTF-8
 # environment
 LC_TIME = en_US.UTF-8
 # environment
-INVOCATION_ID = 3696c74248eb4c969e9e2fa121391e91
+INVOCATION_ID = bcd0ebb8c3bd4ba194abadd779a9bdde
 # environment
 VSCODE_LOG_NATIVE = false
 # environment
@@ -181,7 +179,7 @@ GIO_LAUNCHED_DESKTOP_FILE = /home/ian/.local/share/applications/code.desktop
 # makefile
 .DEFAULT_GOAL := 
 # environment
-SYSTEMD_EXEC_PID = 52977
+SYSTEMD_EXEC_PID = 1913
 # environment
 DISPLAY = :0
 # environment
@@ -191,11 +189,11 @@ GTK_MODULES = gail:atk-bridge
 # default
 MAKE_VERSION := 4.3
 # environment
-MANAGERPID = 16284
+MANAGERPID = 1662
 # environment
 LC_MEASUREMENT = en_US.UTF-8
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 82402
+GIO_LAUNCHED_DESKTOP_FILE_PID = 17190
 # environment
 _ = /usr/share/code/code
 # environment
@@ -203,9 +201,7 @@ LC_PAPER = en_US.UTF-8
 # environment
 XDG_RUNTIME_DIR = /run/user/1000
 # environment
-GPG_AGENT_INFO = /run/user/1000/gnupg/S.gpg-agent:0:1
-# environment
-JOURNAL_STREAM = 8:481698
+JOURNAL_STREAM = 8:38321
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -235,7 +231,7 @@ GDMSESSION = ubuntu
 # environment
 LC_IDENTIFICATION = en_US.UTF-8
 # variable set hash-table stats:
-# Load=111/1024=11%, Rehash=0, Collisions=4/138=3%
+# Load=109/1024=11%, Rehash=0, Collisions=4/136=3%
 
 # Pattern-specific Variable Values
 
@@ -300,7 +296,8 @@ GNUmakefile:
 
 # strcache performance: lookups = 37 / hit rate = 8%
 # hash-table stats:
+ 
 # Load=34/8192=0%, Rehash=0, Collisions=0/37=0%
-# Finished Make data base on Wed May 25 21:57:49 2022
+# Finished Make data base on Sun May 29 16:50:23 2022
 
  
