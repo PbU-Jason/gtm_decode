@@ -259,7 +259,7 @@ static void parse_event_adc(unsigned char *target)
     event_buffer->if_hit = ((*target & 0x40) == 0x40);
     event_buffer->gtm_module = (*target & 0x20) ? SLAVE : MASTER;
     event_buffer->citiroc_id = (*target & 0x10) ? 1 : 0;
-    event_buffer->energy_filter = (*(target + 1) & 0x20) ? 1 : 0;
+    event_buffer->energy_filter = (*(target + 1) & 0x40) ? 1 : 0;
 
     // read channel id, it's spilt between bytes
     memcpy(buffer, target, 3);
