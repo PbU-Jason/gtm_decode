@@ -18,14 +18,14 @@ void parse_science_data(void)
     event_buffer->pps_counter = INI_PPS_COUNTER;
     event_buffer->fine_counter = INI_FINE_COUNTER;
 
-    actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+    actual_binary_buffer_size = read_from_file(binary_buffer, bin_file, max_binary_buffer_size);
     // find first sd header
     sd_header_location = find_next_sd_header(binary_buffer, -SD_HEADER_SIZE, actual_binary_buffer_size);
     if (sd_header_location != 0)
     {
         log_message("Binary file doesn't start with science data header, first science data header is at byte %zu", (size_t)ftell(bin_file) - actual_binary_buffer_size + sd_header_location);
         fseek(bin_file, sd_header_location - actual_binary_buffer_size, SEEK_CUR);
-        actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+        actual_binary_buffer_size = read_from_file(binary_buffer, bin_file, max_binary_buffer_size);
     }
 
     // loop through buffer
@@ -121,7 +121,7 @@ void parse_science_data(void)
         }
         // offset position indicator of input file stream based on previous sd header position
         fseek(bin_file, old_sd_header_location - actual_binary_buffer_size, SEEK_CUR);
-        actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+        actual_binary_buffer_size = read_from_file(binary_buffer, bin_file, max_binary_buffer_size);
     }
     log_message("packet summary: full = %zu, broken = %zu", full, broken);
 }

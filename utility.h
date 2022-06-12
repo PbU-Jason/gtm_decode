@@ -1,5 +1,12 @@
 #ifndef UTILITY_H
 #define UTILITY_H
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -9,6 +16,7 @@ extern size_t max_binary_buffer_size; // in bytes
 extern int decode_mode;
 extern int export_mode;
 extern int terminal_out;
+extern int continuous_read_mode;
 extern int debug_output;
 extern int exclude_nohit;
 extern unsigned char *binary_buffer;
@@ -33,4 +41,5 @@ double find_time_delta(Time *start, Time *end);
 void get_month_and_mday(void);
 void pop_bytes(unsigned char *target, size_t pop_size, size_t total_size);
 int compare_UTC(Time *time1, Time *time2);
+size_t read_from_file(unsigned char *target_buffer, FILE *file_stream, size_t max_size);
 #endif

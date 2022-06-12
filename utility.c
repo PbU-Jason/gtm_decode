@@ -13,6 +13,7 @@ size_t max_binary_buffer_size = 1174405120; // 1GB
 int decode_mode = 0;
 int export_mode = 0;
 int terminal_out = 0;
+int continuous_read_mode = 0;
 int debug_output = 1;
 int exclude_nohit = 1;
 unsigned char *binary_buffer = NULL;
@@ -377,4 +378,51 @@ void pop_bytes(unsigned char *target, size_t pop_size, size_t total_size)
 int compare_UTC(Time *time1, Time *time2)
 {
     return (time1->year == time2->year && time1->month == time2->month && time1->mday == time2->mday && time1->day == time2->day && time1->hour == time2->hour && time1->minute == time2->minute && time1->sec == time2->sec && time1->sub_sec == time2->sub_sec);
+}
+
+// achieve same sleep interval in Linux/Windows
+static void uniform_sleep(int sec)
+{
+#ifdef _WIN32
+    Sleep(sec * 1000);
+#else
+    sleep(sec);
+#endif
+}
+
+size_t read_from_file(unsigned char *target_buffer, FILE *file_stream, size_t max_size)
+{
+    size_t already_read_size;
+    char c;
+    int stop_the_read = 0;
+
+    already_read_size = fread(target_buffer, 1, max_size, file_stream);
+    while (continuous_read_mode && already_read_size < max_size)
+    {
+        log_message("waiting for new data...");
+        log_message("stop the waiting? (y/n)");
+        while (1)
+        {
+            c = getchar();
+            if (c == 'y')
+            {
+                stop_the_read = 1;
+                break;
+            }
+            else if (c == 'n')
+            {
+                log_message("come back in 10s");
+                break;
+            }
+        }
+        if (stop_the_read)
+        {
+            break;
+        }
+
+        uniform_sleep(10);
+        clearerr(file_stream);
+        already_read_size += fread(target_buffer + already_read_size, 1, max_size - already_read_size, file_stream);
+    }
+    return already_read_size;
 }

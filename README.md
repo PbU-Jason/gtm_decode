@@ -1,7 +1,7 @@
 # gtm_decode
 a WIP gtm decoder
 
-README version: 20220525
+README version: 20220612
 ## Compile from source
 ### Linux
 Install `git` and `gcc` from system's package manager. This program also use `argp`, which morden linux installed by default.
@@ -31,11 +31,13 @@ GTM decoder -- decode GTM binary file to human readable data
 
   -b, --buffer-size=Bytes    The max buffer size while loading the binary file.
                              The defalt size is 1 GB
+  -c, --continuous           when reaching the end of the file, the program
+                             will wait for the new data
   -e, --export-mode=Num      the export mode, for deocde mode 0 only. 0 =
                              output raw format, 1 = output pipeline format, 2 =
                              output both, default 0
       --get-nohit-event      output zero hit event adc, only affect science
-                             data(decode mode 0)
+                             data(decode mode 0) raw output
   -i, --input=FILE           Required!!, The input binary file
   -m, --decode-mode=Num      Required!!, the decode mode, 0 = decode science
                              data, 1 = decode telemetry data, 2 = extract
@@ -55,8 +57,11 @@ for any corresponding short options.
 
 - input file, output file and decode mode is required.
 - `--get-nohit-event` will significantly slow down the program!!
-- buffer size should not be too small, probably larger than 1 MB will be fine.
-
+- currently, `-c` flag is only tested and effective in decode mode 0. other mode will simply ignore this option.
+- buffer size recommendation: 
+  - decode mode 0: >= 1110, the larger the more efficient. when using  `-c` flag, recommend to set it to a small value like 1110. notice that all value will be round to the multiple of 1110.
+  - decode mode 1: WIP
+  - decode mode 2: WIP
 ## Warning/Error message
 During the decoding, there might be warning/error message. 
 
@@ -212,3 +217,6 @@ head;gtm module;Packet Counter;year;day;hour;minute;sec;Lastest PPS Counter;Last
 There will be prefix_extracted.bin.
 
 Inside is a binary file contain only pure science data, no NSPO wrapping.
+
+## TODO
+- implement `-c` mode in decode mode 1 and 2
