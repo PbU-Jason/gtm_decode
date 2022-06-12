@@ -125,6 +125,10 @@ void set_argument(int argc, char **argv)
     // modified buffer size base on decode mode
     if (decode_mode == 0)
     {
+        if (max_binary_buffer_size < SCIENCE_DATA_SIZE + SD_HEADER_SIZE)
+        {
+            log_error("buffer size is too small, set it to at least %i", SCIENCE_DATA_SIZE + SD_HEADER_SIZE);
+        }
         // make sure each buffer contain integer number of science packets
         max_binary_buffer_size -= max_binary_buffer_size % (SCIENCE_DATA_SIZE + SD_HEADER_SIZE);
     }
