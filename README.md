@@ -57,11 +57,11 @@ for any corresponding short options.
 
 - input file, output file and decode mode is required.
 - `--get-nohit-event` will significantly slow down the program!!
-- currently, `-c` flag is only tested and effective in decode mode 0. other mode will simply ignore this option.
+- currently, `-c` flag is not tested and ignored in decode mode 1
 - buffer size recommendation: 
   - decode mode 0: >= 1110, the larger the more efficient. when using  `-c` flag, recommend to set it to a small value like 1110. notice that all value will be round to the multiple of 1110.
   - decode mode 1: WIP
-  - decode mode 2: WIP
+  - decode mode 2: no constrain. recommend to set yo small value when using `-c` flag, and set to large value in normal use
 ## Warning/Error message
 During the decoding, there might be warning/error message. 
 

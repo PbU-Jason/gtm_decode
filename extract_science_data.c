@@ -18,7 +18,7 @@ void extract_science_data(void)
         log_error("fail to create NSPO data buffer");
     }
 
-    actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+    actual_binary_buffer_size = read_from_file(binary_buffer, bin_file, max_binary_buffer_size);
     // loop through buffer
     while (1)
     {
@@ -58,7 +58,7 @@ void extract_science_data(void)
             break;
         }
         chunk_start += actual_binary_buffer_size;
-        actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+        actual_binary_buffer_size = read_from_file(binary_buffer, bin_file, max_binary_buffer_size);
     }
 
     log_message("extract total %lli nspo packets", nspo_packet_counter);
