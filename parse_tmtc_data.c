@@ -21,13 +21,12 @@ void parse_tmtc_data(void)
         log_error("fail to create tmtc data buffer");
     }
 
-    actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+    actual_binary_buffer_size = read_from_file(binary_buffer, bin_file, max_binary_buffer_size);
     // loop through buffer
     while (1)
     {
         log_message("load new chunk");
 
-        tmtc_data_buffer_counter = 0;
         for (location = 0; location < actual_binary_buffer_size; location++)
         {
             memcpy(tmtc_data_buffer + tmtc_data_buffer_counter, binary_buffer + location, 1);
@@ -36,8 +35,8 @@ void parse_tmtc_data(void)
             { // tmtc header
                 if (!is_tmtc_header(tmtc_data_buffer))
                 { // is not tmtc header
-                    tmtc_data_buffer_counter = 0;
-                    location--;
+                    tmtc_data_buffer[0] = tmtc_data_buffer[1];
+                    tmtc_data_buffer_counter = 1;
                 }
             }
             if (tmtc_data_buffer_counter == TMTC_DATA_SIZE)
@@ -58,7 +57,7 @@ void parse_tmtc_data(void)
         {
             break;
         }
-        actual_binary_buffer_size = fread(binary_buffer, 1, max_binary_buffer_size, bin_file);
+        actual_binary_buffer_size = read_from_file(binary_buffer, bin_file, max_binary_buffer_size);
     }
 
     free(tmtc_data_buffer);
