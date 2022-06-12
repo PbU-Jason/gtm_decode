@@ -56,7 +56,7 @@ void parse_science_data(void)
             old_sd_header_location = sd_header_location;
             sd_header_location = find_next_sd_header(binary_buffer, sd_header_location, actual_binary_buffer_size);
 
-            if (sd_header_location == -1) // no next sd header is found
+            if (sd_header_location == -1) // no next sd header is found or the remaining buffer isn't large enough to contain a science packet
             {
                 // no next sd header and this is not the last buffer, load next buffer, don't parse the packet
                 if (actual_binary_buffer_size == max_binary_buffer_size)

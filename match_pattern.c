@@ -341,7 +341,13 @@ int find_next_sd_header(unsigned char *buffer, size_t current_sd_header_location
             return location;
         }
     }
+    // remaining buffer isn't large enough to contain a science packet
+    else
+    {
+        return -1;
+    }
 
+    // the remaining buffer is large enough but science header doesn't appear is the correct position, try to find forward from old science data header
     for (location = current_sd_header_location + SD_HEADER_SIZE; location <= actual_buffer_size - SD_HEADER_SIZE; location++)
     {
         if (is_sd_header(buffer + location))
