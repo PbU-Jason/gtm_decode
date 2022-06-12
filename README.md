@@ -59,8 +59,8 @@ for any corresponding short options.
 - `--get-nohit-event` will significantly slow down the program!!
 - buffer size recommendation: 
   - decode mode 0: >= 1110, the larger the more efficient. when using  `-c` flag, recommend to set it to a small value like 1110. notice that all value will be round to the multiple of 1110.
-  - decode mode 1: no constrain. recommend to set yo small value when using `-c` flag, and set to large value in normal use.
-  - decode mode 2: no constrain. recommend to set yo small value when using `-c` flag, and set to large value in normal use.
+  - decode mode 1: no constrain. recommend to set to small value when using `-c` flag, and set to large value in normal use.
+  - decode mode 2: no constrain. recommend to set to small value when using `-c` flag, and set to large value in normal use.
 ## Warning/Error message
 During the decoding, there might be warning/error message. 
 
