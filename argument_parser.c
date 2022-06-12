@@ -23,96 +23,105 @@ static struct argp_option options[] = {
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
-  switch (key)
-  {
-  case 'i':
-    input_file_path = arg;
-    break;
-  case 'o':
-    output_file_path = arg;
-    break;
-  case 'm':
-    if (!sscanf(arg, "%u", &decode_mode))
+    switch (key)
     {
-      log_error("can't parse decode mode");
+    case 'i':
+        input_file_path = arg;
+        break;
+    case 'o':
+        output_file_path = arg;
+        break;
+    case 'm':
+        if (!sscanf(arg, "%u", &decode_mode))
+        {
+            log_error("can't parse decode mode");
+        }
+        break;
+    case 'e':
+        if (!sscanf(arg, "%u", &export_mode))
+        {
+            log_error("can't parse export mode");
+        }
+        break;
+    case 't':
+        log_message("toggle terminal output");
+        terminal_out = 1;
+        break;
+    case 'b':
+        if (!sscanf(arg, "%zu", &max_binary_buffer_size))
+        {
+            log_error("can't parse buffer-size");
+        }
+        break;
+    case 's':
+        debug_output = 0;
+        break;
+    case 128:
+        exclude_nohit = 0;
+        break;
+    case 'v':
+        fputs(version_str, stdout);
+        exit(0);
+    default:
+        return ARGP_ERR_UNKNOWN;
     }
-    break;
-  case 'e':
-    if (!sscanf(arg, "%u", &export_mode))
-    {
-      log_error("can't parse export mode");
-    }
-    break;
-  case 't':
-    log_message("toggle terminal output");
-    terminal_out = 1;
-    break;
-  case 'b':
-    if (!sscanf(arg, "%zu", &max_binary_buffer_size))
-    {
-      log_error("can't parse buffer-size");
-    }
-    break;
-  case 's':
-    debug_output = 0;
-    break;
-  case 128:
-    exclude_nohit = 0;
-    break;
-  case 'v':
-    fputs(version_str, stdout);
-    exit(0);
-  default:
-    return ARGP_ERR_UNKNOWN;
-  }
-  return 0;
+    return 0;
 }
 
 static struct argp argp = {options, parse_opt, args_doc, doc};
 
 void set_argument(int argc, char **argv)
 {
-  argp_parse(&argp, argc, argv, 0, 0, NULL);
+    argp_parse(&argp, argc, argv, 0, 0, NULL);
 
-  // make a small summary about the execution
-  log_message("execution summary------------------");
-  printf("  GTM decodeder version: %s", version_str);
-  switch (decode_mode)
-  {
-  case 0:
-    puts("  decode mode set to 0, decoding science data");
-    switch (export_mode)
+    // make a small summary about the execution
+    log_message("execution summary------------------");
+    if (debug_output)
     {
-    case 0:
-      puts("  export mode set to 0, export raw format only");
-      break;
-    case 1:
-      puts("  export mode set to 1, export pipeline format only");
-      break;
-    case 2:
-      puts("  export mode set to 2, export both raw and pipeline format");
-      break;
-    default:
-      log_error("unknown export mode");
+        printf("  GTM decodeder version: %s", version_str);
+        switch (decode_mode)
+        {
+        case 0:
+            puts("  decode mode set to 0, decoding science data");
+            switch (export_mode)
+            {
+            case 0:
+                puts("  export mode set to 0, export raw format only");
+                break;
+            case 1:
+                puts("  export mode set to 1, export pipeline format only");
+                break;
+            case 2:
+                puts("  export mode set to 2, export both raw and pipeline format");
+                break;
+            default:
+                log_error("unknown export mode");
+            }
+            break;
+        case 1:
+            puts("  decode mode set to 1, decoding telemetry data");
+            break;
+        case 2:
+            puts("  decode mode set to 2, extracting science data");
+            break;
+        default:
+            log_error("unknown decode mode");
+            break;
+        }
+        printf("  input binary file: %s\n", input_file_path);
+        puts("--------------------------------------------");
     }
-    break;
-  case 1:
-    puts("  decode mode set to 1, decoding telemetry data");
-    break;
-  case 2:
-    puts("  decode mode set to 2, extracting science data");
-    break;
-  default:
-    log_error("unknown decode mode");
-    break;
-  }
-  printf("  input binary file: %s\n", input_file_path);
-  puts("--------------------------------------------");
 
-  // modified exort mode based on decode mode
-  if (decode_mode == 1 || decode_mode == 2)
-  { // no pipeline output for tmtc and nspo data
-    export_mode = 0;
-  }
-  open_all_file(input_file_path, output_file_path);
+    // modified exort mode based on decode mode
+    if (decode_mode == 1 || decode_mode == 2)
+    { // no pipeline output for tmtc and nspo data
+        export_mode = 0;
+    }
+    // modified buffer size base on decode mode
+    if (decode_mode == 0)
+    {
+        // make sure each buffer contain integer number of science packets
+        max_binary_buffer_size -= max_binary_buffer_size % (SCIENCE_DATA_SIZE + SD_HEADER_SIZE);
+    }
+    open_all_file(input_file_path, output_file_path);
 }
