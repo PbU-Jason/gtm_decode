@@ -217,5 +217,3 @@ There will be prefix_extracted.bin.
 
 Inside is a binary file contain only pure science data, no NSPO wrapping.
 
-## TODO
-- implement `-c` mode in decode mode 1 and 2
